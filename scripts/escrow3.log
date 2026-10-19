@@ -1,0 +1,20 @@
+on-chain ambiguity                 79
+expected release pct (derive.js)   18
+expected first payout              180000
+balances before                    {"beneficiary":"0","funder":"0"}
+open_action                        ACCEPTED/MAJORITY_AGREE exec=SUCCESS
+action stored                      {"escrow":1000000,"paid":0,"status":"OPEN"}
+execute_action #1 (stranger)       ACCEPTED/MAJORITY_AGREE exec=SUCCESS
+paid after #1                      180000
+execute_action #2 (no new clarity) ACCEPTED/MAJORITY_AGREE exec=ERROR
+paid after #2 (must be unchanged)  180000
+close_action while open (refuse)   ACCEPTED/MAJORITY_AGREE exec=ERROR
+close_inquiry by stranger (refuse) ACCEPTED/MAJORITY_AGREE exec=ERROR
+close_inquiry by opener            ACCEPTED/MAJORITY_AGREE exec=SUCCESS
+close_action by stranger (refuse)  ACCEPTED/MAJORITY_AGREE exec=ERROR
+close_action by funder             ACCEPTED/MAJORITY_AGREE exec=SUCCESS
+final action                       {"status":"CLOSED","escrow":1000000,"paid":180000}
+beneficiary gained                 180000
+funder balance change              820000
+expected: beneficiary              180000
+expected: refund                   820000

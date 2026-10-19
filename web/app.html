@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Concordance App · Live on GenLayer Studio</title>
+<meta name="description" content="Open an inquiry, add your account, convene GenLayer validators and read the agreement record. Live on GenLayer Studio.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..600&family=Instrument+Sans:wght@400..700&family=JetBrains+Mono:wght@400..700&display=swap">
+<link rel="stylesheet" href="concordance.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230d0e11'/%3E%3Cpath d='M4 12 C11 5 21 5 28 12' stroke='%234cc9c0' fill='none' stroke-width='2.4'/%3E%3Cpath d='M4 20 C11 27 21 27 28 20' stroke='%23ff7a59' fill='none' stroke-width='2.4'/%3E%3Crect x='14.5' y='13.5' width='3' height='5' fill='%23e0b040'/%3E%3C/svg%3E">
+<style>.wrap{max-width:1100px}</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="brand" href="index.html"><svg viewBox="0 0 32 32" aria-hidden="true" style="width:26px;height:26px"><path d="M3 12 C10 4 22 4 29 12" stroke="#4cc9c0" fill="none" stroke-width="2.2"/><path d="M3 20 C10 28 22 28 29 20" stroke="#ff7a59" fill="none" stroke-width="2.2"/><rect x="14.4" y="13.2" width="3.2" height="5.6" fill="#e0b040"/></svg>CONCORDANCE</a>
+    <div class="row">
+      <span class="chip" id="netchip"><b>GenLayer Studio</b> testnet</span>
+      <span class="chip" id="whochip" hidden></span>
+      <button id="btnWallet">Connect wallet</button>
+      <button id="btnFund" hidden title="Studio is a test network. Adds free test GEN to the connected account.">Get test GEN</button>
+      <button id="btnBurner" title="Generate a throwaway key in this browser. Testnet only.">Use burner key</button>
+    </div>
+  </header>
+
+  <div class="hero" style="padding:40px 0 10px">
+    <p class="kicker">Public ledger &middot; GenLayer Studio</p>
+    <h1 style="margin-top:0">Run your own <em style="font-style:italic;color:var(--brass)">inquiry</em></h1>
+    <p>Anyone can open a question, anyone can add an account, and GenLayer validators agree on a record of what is settled, what is contested and how contested. Everything is public and on-chain.</p>
+  </div>
+
+  <div class="banner" id="status" hidden></div>
+
+  <!-- LIST -->
+  <section class="card" id="vList">
+    <div class="row" style="justify-content:space-between"><div><h2><span class="no">01</span>Public inquiries</h2><p class="sub" id="listSub">Loading from the chain&hellip;</p></div><button class="primary" id="btnNew">+ New inquiry</button></div>
+    <div class="list" id="list"></div>
+  </section>
+
+  <!-- NEW -->
+  <section class="card" id="vNew" hidden>
+    <div class="row" style="justify-content:space-between"><div><h2><span class="no">&plus;</span>New inquiry</h2><p class="sub">State the question, then 2&ndash;8 propositions that parties can affirm or deny. Weight (1&ndash;10) says how much each matters.</p></div><button id="btnNewBack">Cancel</button></div>
+    <label for="nq">Question</label><input id="nq" maxlength="400" placeholder="e.g. Was the delivery late, and who is responsible?">
+    <label>Propositions</label>
+    <div id="nprops"></div>
+    <div class="row" style="margin-top:10px"><button id="btnAddProp">+ Add proposition</button></div>
+    <div class="warnbox">Everything you submit is public on-chain and cannot be edited or deleted. Do not include secrets or personal data.</div>
+    <div class="row" style="margin-top:14px"><button class="primary" id="btnCreate">Open inquiry</button></div>
+  </section>
+
+  <!-- DETAIL -->
+  <section id="vDetail" hidden>
+    <div class="card">
+      <div class="row" style="justify-content:space-between"><button id="btnBack">&larr; All inquiries</button><div class="row"><span class="pill" id="dStatus"></span><button id="btnRefresh">Refresh</button></div></div>
+      <h1 id="dQ" style="font-size:clamp(20px,3vw,28px);margin-top:14px"></h1>
+      <div class="small" id="dMeta"></div>
+    </div>
+
+    <div class="card" id="cRecord" hidden>
+      <h2><span class="no">&#9670;</span>Agreement record</h2><p class="sub" id="recSub"></p>
+      <div class="tuner" style="margin:10px 0 22px"><div class="readout"><b id="ringN">--</b><span>ambiguity index<br>0 concord &middot; 100 discord</span></div>
+        <div class="scale"><div class="ends"><span>concord</span><span>discord</span></div><div class="track"></div><div class="ticks"></div><i class="mark" id="mark2" style="left:0"></i></div></div>
+      <div style="overflow-x:auto"><table class="mx" id="mx"></table></div>
+      <div id="whyList"></div>
+      <div class="small" id="traj" style="margin-top:8px"></div>
+    </div>
+
+    <div class="card">
+      <h2><span class="no">02</span>Accounts</h2><p class="sub" id="acctSub">Each party states what it saw. Replacing your account before the next convening is allowed.</p>
+      <div id="parties"></div>
+      <div id="acctForm">
+        <div class="two"><div><label for="aLabel">Your label (who you are in this story)</label><input id="aLabel" maxlength="40" placeholder="e.g. Carrier"></div><div><label for="aUrls">Evidence URLs (https, up to 3, comma separated; optional)</label><input id="aUrls" placeholder="https://..."></div></div>
+        <label for="aText">Your account</label><textarea id="aText" maxlength="2000" placeholder="What happened, in your words. Say what you affirm or deny."></textarea>
+        <label for="aEv">Attached evidence (excerpts, readings, timestamps; optional)</label><textarea id="aEv" maxlength="1500" placeholder="Concrete, checkable details score higher than bare assertions."></textarea>
+        <div class="row" style="margin-top:12px"><button class="primary" id="btnSubmitAcct">Submit account</button><button id="btnConvene">Convene validators</button><button id="btnClose" hidden>Close inquiry</button></div>
+        <div class="small" id="conveneHint" style="margin-top:8px"></div>
+      </div>
+    </div>
+
+    <div class="card" id="cEscrow" hidden>
+      <h2><span class="no">03</span>Ambiguity-priced escrow</h2>
+      <p class="sub">Lock funds that release in proportion to how settled the required propositions are. Releases only ratchet up; the funder reclaims the rest once the inquiry is closed.</p>
+      <div id="reqs"></div>
+      <div class="two"><div><label for="eBen">Beneficiary address</label><input id="eBen" placeholder="0x..."></div><div><label for="eVal">Amount (GEN)</label><input id="eVal" value="0.001" inputmode="decimal"></div></div>
+      <div class="two"><div><label for="eMin">Minimum clarity per requirement (0&ndash;100)</label><input id="eMin" value="0" inputmode="numeric"></div><div></div></div>
+      <div class="row" style="margin-top:12px"><button class="primary" id="btnOpenAct">Lock escrow</button><span class="small" id="relPrev"></span></div>
+      <div id="acts"></div>
+    </div>
+  </section>
+
+  <p class="small" style="margin-top:28px">Contract <code id="caddr"></code> on GenLayer Studio. Studio is a test network: balances have no value. Keys never leave your browser; the burner key is stored in this browser only.</p>
+</div>
+
+<script src="derive.js"></script>
+<script type="module">
+import { createClient, createAccount, generatePrivateKey } from "https://esm.sh/genlayer-js@1.1.8";
+import { studionet } from "https://esm.sh/genlayer-js@1.1.8/chains";
+
+const C = window.Concordance;
+const DEFAULT_CONTRACT = "0x58E8b84B0b55e9d4d33e5E973CF41D475919ECc7";
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const store = { get: (k) => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch {} } };
+
+const params = new URLSearchParams(location.search);
+const CONTRACT = (params.get("contract") || DEFAULT_CONTRACT).trim();
+$("caddr").textContent = CONTRACT;
+const read = createClient({ chain: studionet });
+let write = null, me = null, cur = null, curId = null;
+
+/* ---------- helpers ---------- */
+function say(html, cls = "") { const b = $("status"); b.hidden = !html; b.className = "banner " + cls; b.innerHTML = html; }
+async function call(fn, args = []) {
+  for (let a = 0; a < 4; a++) { try { return await read.readContract({ address: CONTRACT, functionName: fn, args }); } catch (e) { if (a === 3) throw e; await sleep(1500 * (a + 1)); } }
+}
+const DONE = ["FINALIZED", "ACCEPTED", "UNDETERMINED", "CANCELED", "LEADER_TIMEOUT", "VALIDATORS_TIMEOUT"];
+function needAccount() { if (!write) { say("Connect a wallet or use a burner key first (top right).", "warn"); return false; } return true; }
+function niceError(e) {
+  const m = String((e && (e.shortMessage || e.message)) || e);
+  if ((e && (e.code === 4001 || e.cause?.code === 4001)) || /user (rejected|denied)|rejected the request/i.test(m)) return "You rejected the request in your wallet. Nothing was sent.";
+  if (/insufficient funds/i.test(m)) return "Your account has too little GEN for this amount. Use “Get test GEN”.";
+  return m.split(/\s*(Details:|Version:)/)[0].trim() || m;
+}
+async function tx(label, fn, args, value = 0n) {
+  if (!needAccount()) throw new Error("no account");
+  const t0 = Date.now(); let timer;
+  const tick = () => say(`<span class="spin"></span>${esc(label)}: waiting for validators&hellip; ${Math.round((Date.now() - t0) / 1000)}s`);
+  tick(); timer = setInterval(tick, 1000);
+  try {
+    if (me?.kind === "wallet") await ensureChain();
+    const hash = await write.writeContract({ address: CONTRACT, functionName: fn, args, value });
+    let t = null;
+    for (let i = 0; i < 240; i++) { await sleep(3000); try { t = await read.getTransaction({ hash }); } catch { continue; } if (DONE.includes(t?.statusName)) break; }
+    const exec = t?.consensus_data?.leader_receipt?.[0]?.execution_result;
+    if (t?.statusName === "UNDETERMINED") throw new Error(`${label}: validators did not reach agreement (${t.result_name}). You can try again.`);
+    if (exec === "ERROR") throw new Error(`${label}: the contract rejected this call (a rule was not met, e.g. permissions, limits or state).`);
+    if (!DONE.includes(t?.statusName)) throw new Error(`${label}: timed out waiting for the network.`);
+    say(`${esc(label)} done (${t.statusName}${t.result_name ? " · " + t.result_name : ""}${t.num_of_rounds ? " · " + t.num_of_rounds + " consensus round" + (Number(t.num_of_rounds) > 1 ? "s" : "") : ""}, ${Math.round((Date.now() - t0) / 1000)}s).`, "good");
+    return { hash, t };
+  } catch (e) { say(esc(niceError(e)), "bad"); throw e; } finally { clearInterval(timer); }
+}
+
+/* ---------- account ---------- */
+function setMe(address, kind) {
+  me = { address, kind }; $("whochip").hidden = false; $("whochip").innerHTML = `<b>${kind === "wallet" ? "Wallet" : "Burner"}</b> ${address.slice(0, 6)}&hellip;${address.slice(-4)}`;
+  $("btnWallet").textContent = "Switch wallet"; $("btnFund").hidden = false;
+  if (curId) renderDetail();
+}
+$("btnBurner").onclick = () => {
+  let pk = store.get("cc_burner");
+  if (!pk) { pk = generatePrivateKey(); store.set("cc_burner", pk); }
+  const acc = createAccount(pk);
+  write = createClient({ chain: studionet, account: acc });
+  setMe(acc.address, "burner");
+  say("Burner key ready. It lives only in this browser and is for this test network; never reuse it elsewhere.", "good");
+};
+const STUDIO_HEX = "0x" + studionet.id.toString(16);
+async function ensureChain() {
+  const p = window.ethereum; if (!p) throw new Error("No wallet found.");
+  const here = async () => String(await p.request({ method: "eth_chainId" })).toLowerCase();
+  if ((await here()) === STUDIO_HEX) return;
+  const chain = { chainId: STUDIO_HEX, chainName: studionet.name, rpcUrls: studionet.rpcUrls.default.http, nativeCurrency: studionet.nativeCurrency, blockExplorerUrls: [studionet.blockExplorers?.default?.url].filter(Boolean) };
+  try { await p.request({ method: "wallet_switchEthereumChain", params: [{ chainId: STUDIO_HEX }] }); }
+  catch (e) {
+    if (e && (e.code === 4902 || /unrecognized|not added|add the chain|unknown chain/i.test(e.message || ""))) {
+      await p.request({ method: "wallet_addEthereumChain", params: [chain] });
+      await p.request({ method: "wallet_switchEthereumChain", params: [{ chainId: STUDIO_HEX }] });
+    } else throw e;
+  }
+  const after = await here();
+  if (after !== STUDIO_HEX) throw new Error(`Your wallet is on chain ${parseInt(after, 16)}, not GenLayer Studio (${studionet.id}). Switch networks and retry.`);
+}
+let walletBound = false;
+$("btnWallet").onclick = async () => {
+  try {
+    if (!window.ethereum) { say("No browser wallet found. Install MetaMask, or use a burner key.", "warn"); return; }
+    const accts = await window.ethereum.request({ method: "eth_requestAccounts" });
+    if (!accts || !accts.length) throw new Error("The wallet returned no accounts.");
+    await ensureChain(); // our own add/switch: client.connect() also insists on installing the GenLayer MetaMask Snap, which is not needed to send transactions
+    write = createClient({ chain: studionet, account: accts[0], provider: window.ethereum });
+    setMe(accts[0], "wallet");
+    if (!walletBound && window.ethereum.on) {
+      walletBound = true;
+      window.ethereum.on("accountsChanged", (a) => { if (me?.kind !== "wallet") return; if (!a.length) { write = null; me = null; $("whochip").hidden = true; $("btnFund").hidden = true; say("Wallet disconnected.", "warn"); } else { write = createClient({ chain: studionet, account: a[0], provider: window.ethereum }); setMe(a[0], "wallet"); say("Switched to " + a[0].slice(0, 8) + "…", "good"); } });
+      window.ethereum.on("chainChanged", (c) => { if (me?.kind === "wallet" && String(c).toLowerCase() !== STUDIO_HEX) say("Your wallet left GenLayer Studio. It will be switched back before the next transaction.", "warn"); });
+    }
+    say("Wallet connected to GenLayer Studio. Studio charges no gas; use “Get test GEN” if you want to lock escrow.", "good");
+  } catch (e) { say("Wallet connection failed: " + esc(e.message || e), "bad"); }
+};
+$("btnFund").onclick = async () => {
+  if (!me) return;
+  try {
+    const body = `{"jsonrpc":"2.0","id":1,"method":"sim_fundAccount","params":["${me.address}",5000000000000000000]}`;
+    const r = await (await fetch(studionet.rpcUrls.default.http[0], { method: "POST", headers: { "content-type": "application/json" }, body })).json();
+    if (r.error) throw new Error(r.error.message);
+    say("Added test GEN to " + me.address.slice(0, 8) + "…", "good");
+  } catch (e) { say("Faucet failed: " + esc(e.message || e), "bad"); }
+};
+if (store.get("cc_burner") && !window.ethereum) $("btnBurner").click();
+
+/* ---------- views ---------- */
+function show(v) { for (const id of ["vList", "vNew", "vDetail"]) $(id).hidden = id !== v; window.scrollTo(0, 0); }
+async function loadList() {
+  $("listSub").textContent = "Loading from the chain…";
+  try {
+    const rows = JSON.parse(await call("list_inquiries", [0, 50]));
+    $("listSub").textContent = rows.length ? `${rows.length} inquir${rows.length === 1 ? "y" : "ies"}, newest first. Anyone can open one; anyone can add an account.` : "No inquiries yet. Open the first one.";
+    $("list").innerHTML = rows.map((r, i) => `<div class="inq" style="--d:${(i * 0.06).toFixed(2)}s" tabindex="0" role="button" data-id="${esc(r.inquiry_id)}"><div><div class="q">${esc(r.question)}</div><div class="meta">${esc(r.inquiry_id)} · ${r.parties} part${r.parties === 1 ? "y" : "ies"} · round ${r.round}${r.contested != null ? " · " + r.contested + " contested" : ""}</div></div><div class="row"><span class="amb" style="color:${ambColor(r.ambiguity)}">${r.ambiguity == null ? "–" : r.ambiguity}</span><span class="pill ${r.status === "CLOSED" ? "closed" : "open"}">${esc(r.status)}</span></div></div>`).join("");
+  } catch (e) { $("listSub").textContent = "Could not read the chain: " + (e.message || e); }
+}
+const ambColor = (a) => a == null ? "var(--faint)" : a >= 55 ? "var(--hot)" : a >= 30 ? "var(--amber)" : "var(--agreed)";
+$("list").addEventListener("click", (e) => { const t = e.target.closest(".inq"); if (t) openInquiry(t.dataset.id); });
+$("list").addEventListener("keydown", (e) => { if (e.key === "Enter") { const t = e.target.closest(".inq"); if (t) openInquiry(t.dataset.id); } });
+$("btnNew").onclick = () => { show("vNew"); if (!$("nprops").children.length) { addProp(); addProp(); } };
+$("btnNewBack").onclick = () => show("vList");
+$("btnBack").onclick = () => { curId = null; show("vList"); loadList(); history.replaceState(null, "", location.pathname + (params.get("contract") ? "?contract=" + CONTRACT : "")); };
+
+/* ---------- new inquiry ---------- */
+function addProp(text = "", w = 5) {
+  if ($("nprops").children.length >= 8) return;
+  const d = document.createElement("div"); d.className = "prop-row";
+  d.innerHTML = `<input maxlength="240" placeholder="A claim parties can affirm or deny" value="${esc(text)}" aria-label="Proposition"><input type="number" min="1" max="10" value="${w}" aria-label="Weight 1 to 10"><button aria-label="Remove">&times;</button>`;
+  d.querySelector("button").onclick = () => { if ($("nprops").children.length > 2) d.remove(); };
+  $("nprops").appendChild(d);
+}
+$("btnAddProp").onclick = () => addProp();
+$("btnCreate").onclick = async () => {
+  const q = $("nq").value.trim(), rows = [...$("nprops").children].map((d) => [d.children[0].value.trim(), parseInt(d.children[1].value, 10)]);
+  if (!q) return say("Write the question first.", "warn");
+  if (rows.some(([t, w]) => !t || !(w >= 1 && w <= 10))) return say("Every proposition needs text and a weight from 1 to 10.", "warn");
+  if (rows.length < 2) return say("Add at least two propositions.", "warn");
+  const id = (q.toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 24).replace(/^-|-$/g, "") || "inquiry") + "-" + Math.random().toString(36).slice(2, 7);
+  try {
+    $("btnCreate").disabled = true;
+    await tx("Open inquiry", "open_inquiry", [id, q, rows.map((r) => r[0]), rows.map((r) => r[1])]);
+    await openInquiry(id);
+  } catch {} finally { $("btnCreate").disabled = false; }
+};
+
+/* ---------- detail ---------- */
+async function openInquiry(id) {
+  curId = id; show("vDetail"); history.replaceState(null, "", "?" + new URLSearchParams({ ...(params.get("contract") ? { contract: CONTRACT } : {}), inquiry: id }));
+  await renderDetail(true);
+}
+const lc = (s) => String(s || "").toLowerCase();
+async function renderDetail(fresh) {
+  if (!curId) return;
+  if (fresh || !cur) { $("dQ").textContent = "Loading…"; }
+  let raw; try { raw = await call("get_inquiry", [curId]); } catch (e) { return say("Could not read the chain: " + esc(e.message || e), "bad"); }
+  if (!raw) { $("dQ").textContent = "Inquiry not found"; return; }
+  cur = JSON.parse(raw);
+  $("dQ").textContent = cur.question;
+  $("dStatus").textContent = cur.status; $("dStatus").className = "pill " + (cur.status === "CLOSED" ? "closed" : "open");
+  $("dMeta").innerHTML = `<span style="font-family:var(--mono)">${esc(curId)} · opened by <code>${esc(cur.opener.slice(0, 8))}…</code> · round ${cur.round}/4</span><ol class="props">${cur.props.map((p, i) => `<li><span class="n">${i + 1}</span><span>${esc(p.text)}</span><span class="tag">weight ${p.weight}</span></li>`).join("")}</ol>`;
+  const mine = me && cur.parties.find((p) => lc(p.addr) === lc(me.address));
+  $("parties").innerHTML = cur.parties.length ? cur.parties.map((p, j) => `<div class="party"><b>${j + 1}. ${esc(p.label)}${me && lc(p.addr) === lc(me.address) ? " (you)" : ""}</b><div class="a">${esc(p.account)}</div>${p.evidence_text ? `<div class="e">Evidence: ${esc(p.evidence_text)}</div>` : ""}${p.urls && p.urls.length ? `<div class="e">URLs: ${p.urls.map(esc).join(", ")}</div>` : ""}</div>`).join("") : '<div class="small">No accounts yet.</div>';
+  if (mine && !$("aText").dataset.touched) { $("aLabel").value = mine.label; $("aText").value = mine.account; $("aEv").value = mine.evidence_text || ""; $("aUrls").value = (mine.urls || []).join(", "); }
+  const closed = cur.status === "CLOSED" || cur.round >= 4;
+  $("acctForm").hidden = closed;
+  $("btnSubmitAcct").textContent = mine ? "Replace my account" : "Submit account";
+  $("btnClose").hidden = !(me && lc(me.address) === lc(cur.opener) && cur.status !== "CLOSED");
+  const can = cur.parties.length >= 2 && cur.dirty && !closed;
+  $("btnConvene").disabled = !can;
+  $("conveneHint").textContent = closed ? "This inquiry is closed to new accounts." : cur.parties.length < 2 ? "Needs at least two parties before validators can convene." : !cur.dirty ? "Nothing new since the last convening: add or replace an account first." : "Ready: validators will read every account. This takes about 30–120 seconds.";
+  renderRecord();
+  renderEscrow();
+}
+for (const id of ["aLabel", "aText", "aEv", "aUrls"]) $(id).addEventListener("input", () => { $("aText").dataset.touched = "1"; });
+const stColor = (p) => p.status === "UNSUPPORTED" ? "#77736a" : p.status.startsWith("AGREED") ? "#8fd19e" : p.divergence >= 80 ? "#ff5d4d" : p.divergence >= 55 ? "#f08a3c" : "#e0b040";
+const stText = (p) => p.status === "AGREED_TRUE" ? "AGREED TRUE" : p.status === "AGREED_FALSE" ? "AGREED FALSE" : p.status === "UNSUPPORTED" ? "UNSUPPORTED" : p.lean === "NONE" ? "DEADLOCKED" : "CONTESTED · leans " + p.lean;
+const CAUSE = { FACTUAL: "different facts", DEFINITIONAL: "different meaning", TEMPORAL: "different clock", SCOPE: "different boundary" };
+function renderRecord() {
+  const r = cur.record; $("cRecord").hidden = !r; if (!r) return;
+  $("recSub").textContent = `Round ${cur.round}. Consensus ratifies the ambiguity index and coarse classes; the per-proposition detail is the leader's annotation. ${r.agreed} agreed · ${r.contested} contested · ${r.unsupported} unsupported.`;
+  $("mark2").style.left = r.ambiguity + "%"; $("ringN").textContent = r.ambiguity;
+  const head = `<tr><th>Proposition</th>${cur.parties.slice(0, r.props[0].cells.length).map((p) => `<th>${esc(p.label)}</th>`).join("")}<th>Verdict</th><th>Divergence</th></tr>`;
+  const rows = r.props.map((p) => `<tr><td>${p.index + 1}. ${esc(cur.props[p.index].text)}</td>${p.cells.map((c) => c.stance === "SILENT" ? '<td style="text-align:center;color:var(--faint)">–</td>' : `<td style="text-align:center"><span class="cell" style="background:${c.stance === "AFFIRMS" ? "var(--affirm)" : "var(--deny)"};opacity:${(0.4 + c.strength / 100 * 0.6).toFixed(2)}">${c.stance === "AFFIRMS" ? "yes" : "no"} ${c.strength}</span></td>`).join("")}<td><span class="pod v" style="background:${stColor(p)}">${stText(p)}</span></td><td><div class="bar"><i style="width:${p.divergence}%;background:${stColor(p)}"></i></div><span class="small">${p.divergence}%</span></td></tr>`).join("");
+  $("mx").innerHTML = head + rows;
+  $("whyList").innerHTML = r.props.filter((p) => p.status === "CONTESTED" && p.crux).map((p) => `<div class="whyrow"><span class="tag">${CAUSE[p.cause] || p.cause}</span><b>${p.index + 1}.</b> ${esc(p.crux)}</div>`).join("");
+  call("get_trajectory", [curId]).then((t) => { const a = JSON.parse(t || "[]"); $("traj").textContent = a.length ? "Ambiguity by round: " + a.map((x) => `round ${x.round}: ${x.ambiguity}`).join(" → ") : ""; }).catch(() => {});
+}
+$("btnRefresh").onclick = () => renderDetail(false);
+$("btnSubmitAcct").onclick = async () => {
+  const label = $("aLabel").value.trim(), text = $("aText").value.trim(), ev = $("aEv").value.trim();
+  const urls = $("aUrls").value.split(",").map((s) => s.trim()).filter(Boolean);
+  if (!label || !text) return say("Add a label and your account.", "warn");
+  if (urls.some((u) => !u.startsWith("https://")) || urls.length > 3) return say("Evidence URLs must be https and at most three.", "warn");
+  try { $("btnSubmitAcct").disabled = true; await tx("Submit account", "submit_account", [curId, label, text, ev, urls]); $("aText").dataset.touched = ""; await renderDetail(false); } catch {} finally { $("btnSubmitAcct").disabled = false; }
+};
+$("btnConvene").onclick = async () => {
+  try { $("btnConvene").disabled = true; await tx("Convene validators", "convene", [curId]); await renderDetail(false); } catch { await renderDetail(false); }
+};
+$("btnClose").onclick = async () => { try { await tx("Close inquiry", "close_inquiry", [curId]); await renderDetail(false); } catch {} };
+
+/* ---------- escrow ---------- */
+const myActs = () => { try { return JSON.parse(store.get("cc_acts_" + curId) || "[]"); } catch { return []; } };
+function renderEscrow() {
+  const r = cur.record; $("cEscrow").hidden = !r; if (!r) return;
+  $("reqs").innerHTML = '<label>Required propositions (what must be true for funds to release)</label>' + cur.props.map((p, i) => `<div class="row" style="margin:6px 0"><select data-i="${i}" aria-label="Requirement ${i + 1}" style="width:130px"><option value="">not required</option><option value="TRUE">must be TRUE</option><option value="FALSE">must be FALSE</option></select><span class="small">${i + 1}. ${esc(p.text)}</span></div>`).join("");
+  $("reqs").addEventListener("change", previewRelease);
+  previewRelease(); drawActs();
+}
+function readReqs() { const rp = [], rw = []; document.querySelectorAll("#reqs select").forEach((s) => { if (s.value) { rp.push(+s.dataset.i); rw.push(s.value); } }); return { rp, rw }; }
+function previewRelease() {
+  const { rp, rw } = readReqs(); if (!cur.record || !rp.length) { $("relPrev").textContent = ""; return; }
+  const pct = C.releaseFraction(cur.record.props, rp, rw, parseInt($("eMin").value, 10) || 0);
+  $("relPrev").textContent = `On the current record, ${pct}% would be releasable now.`;
+}
+$("eMin").addEventListener("input", previewRelease);
+const toWei = (s) => { const [a, b = ""] = String(s).trim().split("."); if (!/^\d+$/.test(a || "0") || !/^\d*$/.test(b)) throw new Error("bad amount"); return BigInt(a || "0") * 10n ** 18n + BigInt((b + "0".repeat(18)).slice(0, 18)); };
+$("btnOpenAct").onclick = async () => {
+  const { rp, rw } = readReqs(); const ben = $("eBen").value.trim();
+  if (!rp.length) return say("Mark at least one proposition as required.", "warn");
+  if (!/^0x[0-9a-fA-F]{40}$/.test(ben)) return say("Beneficiary must be a 0x address (42 characters).", "warn");
+  let wei; try { wei = toWei($("eVal").value); } catch { return say("Amount must be a number.", "warn"); }
+  if (wei <= 0n) return say("Amount must be above zero.", "warn");
+  const aid = "act-" + Math.random().toString(36).slice(2, 8);
+  try { $("btnOpenAct").disabled = true; await tx("Lock escrow", "open_action", [aid, curId, ben, rp, rw, parseInt($("eMin").value, 10) || 0], wei); const l = myActs(); l.push(aid); store.set("cc_acts_" + curId, JSON.stringify(l)); drawActs(); } catch {} finally { $("btnOpenAct").disabled = false; }
+};
+async function drawActs() {
+  const ids = myActs(); $("acts").innerHTML = ids.length ? '<label>Your escrows on this inquiry</label>' : "";
+  for (const id of ids) {
+    const raw = await call("get_action", [id]).catch(() => ""); if (!raw) continue; const a = JSON.parse(raw);
+    const pct = cur.record ? C.releaseFraction(cur.record.props, a.req_props, a.req_wants, a.min_clarity) : 0;
+    const el = document.createElement("div"); el.className = "act";
+    el.innerHTML = `<b>${esc(id)}</b> · ${a.status} · escrow ${a.escrow} wei · paid ${a.paid} · justified now ${pct}% <div class="row" style="margin-top:8px"><button data-x="execute_action">Execute release</button><button data-x="close_action">Close &amp; refund remainder</button></div>`;
+    el.querySelectorAll("button").forEach((b) => b.onclick = async () => { try { await tx(b.textContent, b.dataset.x, [id]); await renderDetail(false); } catch {} });
+    $("acts").appendChild(el);
+  }
+}
+
+/* ---------- motion: staggered reveals ---------- */
+document.documentElement.classList.add("js");
+const reveal = [...document.querySelectorAll(".hero>*, .card")];
+reveal.forEach((e, i) => { e.classList.add("reveal"); e.style.setProperty("--d", (Math.min(i % 5, 4) * 0.07).toFixed(2) + "s"); });
+const io = "IntersectionObserver" in window ? new IntersectionObserver((en) => en.forEach((x) => { if (x.isIntersecting) { x.target.classList.add("in"); io.unobserve(x.target); } }), { threshold: 0.05 }) : null;
+reveal.forEach((e) => io ? io.observe(e) : e.classList.add("in"));
+
+/* ---------- boot ---------- */
+(async () => {
+  const want = params.get("inquiry");
+  if (want) await openInquiry(want); else { show("vList"); await loadList(); }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+[
+  {
+    "inquiry": "halden-mvf21ikb",
+    "label": "round1",
+    "hash": "0x51c9e821ffd252dc15b95ad69dfaf0f6241e15094b78a04cbb947b1474b8c34b",
+    "status": "UNDETERMINED",
+    "result": "MAJORITY_DISAGREE",
+    "rounds": "4",
+    "ms": 149057,
+    "leaderVote": null,
+    "validatorVotes": [
+      "agree",
+      "disagree",
+      "idle",
+      "disagree"
+    ],
+    "n": 4
+  },
+  {
+    "inquiry": "halden-mvf21ikb",
+    "label": "round2",
+    "hash": "0x0556baa57936d55892614ddfabc72dac209c3e53d6c7cfbfd08f59e977065f95",
+    "status": "UNDETERMINED",
+    "result": "MAJORITY_DISAGREE",
+    "rounds": "4",
+    "ms": 82865,
+    "leaderVote": null,
+    "validatorVotes": [
+      "disagree",
+      "disagree",
+      "agree",
+      "idle"
+    ],
+    "n": 4
+  }
+]

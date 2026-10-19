@@ -1,0 +1,553 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Concordance · The Inter-Subjective Oracle</title>
+<meta name="description" content="A GenLayer Intelligent Contract that does not collapse disagreement into one answer. It records what everyone agrees on, how much they disagree, why, and lets money move in proportion.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..600&family=Instrument+Sans:wght@400..700&family=JetBrains+Mono:wght@400..700&display=swap">
+<link rel="stylesheet" href="concordance.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230d0e11'/%3E%3Cpath d='M4 12 C11 5 21 5 28 12' stroke='%234cc9c0' fill='none' stroke-width='2.4'/%3E%3Cpath d='M4 20 C11 27 21 27 28 20' stroke='%23ff7a59' fill='none' stroke-width='2.4'/%3E%3Crect x='14.5' y='13.5' width='3' height='5' fill='%23e0b040'/%3E%3C/svg%3E">
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M3 12 C10 4 22 4 29 12" stroke="#4cc9c0" fill="none" stroke-width="2.2"/><path d="M3 20 C10 28 22 28 29 20" stroke="#ff7a59" fill="none" stroke-width="2.2"/><rect x="14.4" y="13.2" width="3.2" height="5.6" fill="#e0b040"/></svg>
+      CONCORDANCE
+    </div>
+    <div class="chips"><a class="chip" href="app.html"><b>Open the live app &rarr;</b></a><span class="chip"><b>GenLayer</b> intelligent contract</span><span class="chip">Inter-subjective oracle</span></div>
+  </header>
+
+  <section class="hero">
+    <p class="kicker">An oracle for situations people see differently</p>
+    <h1>Every oracle collapses disagreement into one answer. <em>Concordance keeps it.</em></h1>
+    <p>Several parties see the same situation differently. Independent validators on different models read all of it, and the network agrees on a record of <b>what is settled, what is contested, how contested, and why</b>. Contracts then act on that record, with money moving in proportion to how settled the facts really are.</p>
+    <div class="tourcta"><button class="primary" id="tourBtn">&#9654; Watch the 60-second tour</button><span>Scripted story, then real GenLayer Studio validators. Esc stops it.</span></div>
+  </section>
+
+  <div class="q"><div><small>The inquiry</small><div id="question"></div></div></div>
+
+  <div class="grid">
+    <div class="stack">
+      <section class="card">
+        <h2><span class="no">01</span>The agreement map</h2>
+        <p class="sub">Ribbons are what each party asserts, width is how well it is evidenced. Pods show what survives. Click a pod to inspect.</p>
+        <div class="ctrl" style="margin-bottom:6px">
+          <div class="seg" role="group" aria-label="Data source"><button id="mScripted" aria-pressed="true">Scripted narrative</button><button id="mReal" aria-pressed="false">Real Studio validators</button></div>
+        </div>
+        <p class="srcnote" id="srcnote"></p>
+        <div class="ctrl">
+          <button class="primary" id="go">Convene validators</button>
+          <button class="ghost" id="reset">Reset</button>
+          <label class="toggle" id="poisonLbl"><input type="checkbox" id="poison"> Inject an attack into Halden's evidence</label>
+        </div>
+        <div id="mapwrap"><svg id="map" viewBox="0 0 1000 600" role="img" aria-label="Agreement map between parties and propositions"></svg></div>
+        <div class="legend">
+          <span><i style="background:var(--affirm)"></i>affirms</span><span><i style="background:var(--deny)"></i>denies</span>
+          <span><i style="background:var(--agreed)"></i>agreed</span><span><i style="background:var(--amber)"></i>contested</span><span><i style="background:var(--hot)"></i>deadlocked</span>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2><span class="no">02</span>Consensus on meaning</h2>
+        <p class="sub">Five validators, five different models, each reads independently. They do not need identical words: they agree if the ambiguity index is within &plusmn;20, at least 3 of 7 propositions land in the same class, and nobody reads agreed-TRUE where another reads agreed-FALSE.</p>
+        <div class="vals" id="vals"></div>
+        <div class="banner" id="banner">Waiting for the first convening.</div>
+      </section>
+
+      <section class="card" id="spreadCard" hidden>
+        <h2><span class="no">03</span>Same inputs, different models</h2>
+        <p class="sub" id="spreadSub"></p>
+        <div class="spread" id="spread"></div>
+        <div class="banner" id="spreadNote" style="margin-top:10px"></div>
+      </section>
+    </div>
+
+    <div class="stack">
+      <section class="card">
+        <h2><span class="no">04</span>Residual ambiguity</h2>
+        <p class="sub">The one number most oracles throw away.</p>
+        <div class="tuner">
+          <div class="readout"><b id="amb">--</b><span>ambiguity index<br>0 concord &middot; 100 discord</span></div>
+          <div class="scale"><div class="ends"><span>concord</span><span>discord</span></div><div class="track"></div><div class="ticks"></div><i class="mark" id="mark" style="left:0;opacity:.25"></i></div>
+          <div class="tally"><span><b id="cA">-</b>agreed</span><span><b id="cC">-</b>contested</span><span><b id="cU">-</b>unsupported</span></div>
+        </div>
+        <div class="traj"><div class="small" id="trajLbl">Ambiguity trajectory</div><svg id="traj" viewBox="0 0 300 70" preserveAspectRatio="none"></svg></div>
+      </section>
+
+      <section class="card">
+        <h2><span class="no">05</span>Triage: what to do about each dispute</h2>
+        <p class="sub">The record also says <i>why</i> parties differ, which tells you whether more evidence can fix it.</p>
+        <div class="tri" id="tri"><div class="empty">Convene the validators to see the triage.</div></div>
+      </section>
+
+      <section class="card esc">
+        <h2><span class="no">06</span>Downstream: ambiguity-priced escrow</h2>
+        <p class="sub" id="escNote"></p>
+        <div class="big"><b id="escPaid">0</b><span class="small" id="escOf"></span></div>
+        <div class="bar" id="escBar"><i class="paid" style="width:0"></i><i class="avail" style="width:0"></i><i class="res" style="width:100%"></i></div>
+        <div class="small" id="escLeg">Paid &middot; releasable now &middot; reserved until the facts settle</div>
+        <div class="reqs" id="reqs"></div>
+        <div class="ctrl" style="margin:8px 0 0"><button id="exec" disabled>Execute release</button></div>
+        <div class="log" id="log"></div>
+      </section>
+    </div>
+  </div>
+
+  <section class="card sec">
+    <h2><span class="no">07</span>The accounts the validators read</h2>
+    <p class="sub">All four parties are fictional. Account text and evidence are untrusted input; validators scan it before reading.</p>
+    <div class="accts" id="accts"></div>
+  </section>
+
+  <section class="card sec">
+    <h2><span class="no">08</span>Same facts, two oracles</h2>
+    <p class="sub">What a conventional majority-vote oracle would hand your contract, versus the Concordance record.</p>
+    <div class="vs" id="vs"><div class="empty">Convene the validators to compare.</div></div>
+  </section>
+
+  <section class="card sec">
+    <h2><span class="no">09</span>Why this only works on GenLayer</h2>
+    <div class="why">
+      <div><h3>Consensus on meaning</h3><p>LLMs never return the same prose twice. Concordance makes them agree on a <b>small, snapped, structured object</b> through the equivalence principle: the ambiguity index within a tolerance, enough propositions in the same class, and no outright contradiction. That is a consensus rule over interpretation, not over bytes.</p></div>
+      <div><h3>Model diversity is the signal</h3><p>Disagreement between parties is the product. Disagreement between <i>validators</i> is the risk, so the contract keeps the LLM on a short leash (stance and evidence strength only) and derives every number that moves money in plain code.</p></div>
+      <div><h3>Greybox by construction</h3><p>Evidence is untrusted. A deterministic scan flags instruction-like text, and a flagged party's evidence weight is capped before anything is derived. An attacker who tries to steer the record loses influence instead of gaining it.</p></div>
+    </div>
+    <div class="honest"><b>How to read this demo.</b> The validator readings are recorded stand-ins for what independent models return; they are replayed, not fetched live. Everything derived from them (status, divergence, ambiguity, lean, release percentage, the equivalence checks, the injection cap) runs in <code>derive.js</code>, which is parity-tested against <code>contracts/concordance.py</code> on the demo and on 300 random inputs. The contract is deployed on GenLayer Studio, where 4 of 4 convenes reached majority agreement. Real models gave noisier numbers than this scripted replay (ambiguity 60–82, no clean drop after round 2); see <code>docs/EQUIVALENCE.md</code>. Not yet run on Bradbury.</div>
+  </section>
+</div>
+<div id="tip" role="tooltip"></div>
+<div id="tour" hidden role="status" aria-live="polite">
+  <div class="tb"><i id="tprog"></i></div>
+  <div class="ti"><span class="ts" id="tstep"></span><p id="tcap"></p>
+    <div class="tbn"><button id="tpause">Pause</button><button id="tstop">Stop</button></div></div>
+</div>
+
+<script src="derive.js"></script>
+<script src="scenarios.js"></script>
+<script src="real.js"></script>
+<script>
+(function(){
+"use strict";
+var S = window.SCENARIO, C = window.Concordance;
+var W = S.props.map(function(p){return p.weight;});
+var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+var $ = function(id){return document.getElementById(id);};
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+function sleep(ms){return new Promise(function(r){setTimeout(r, reduce?0:ms);});}
+
+var MODELS = ["Model A","Model B","Model C","Model D","Model E"];
+var CAUSE = {FACTUAL:"different facts",DEFINITIONAL:"different meaning",TEMPORAL:"different clock",SCOPE:"different boundary",NONE:""};
+var RESOLVABLE = {FACTUAL:true,TEMPORAL:true,SCOPE:true,DEFINITIONAL:false,NONE:true};
+
+var mode = "scripted", R = window.REAL;
+var st = {round:0, poisoned:false, busy:false, rec:null, history:[], paid:0, sel:null, vals:[], log:[]};
+
+/* ---------- derivation helpers (all numbers come from derive.js) ---------- */
+function flaggedFor(r){ return st.poisoned && S.rounds[r].parties.indexOf(S.poison.party) >= 0 ? [S.poison.party] : []; }
+function leaderRec(r){ return C.deriveRecord(W, S.rounds[r].reading, flaggedFor(r)); }
+function rng(seed){ return function(){ seed |= 0; seed = seed + 0x6D2B79F5 | 0; var t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function perturb(reading, seed){
+  var rnd = rng(seed);
+  return {rows: reading.rows.map(function(row){
+    return {cause:row.cause, crux:row.crux, decisive:row.decisive, cells: row.cells.map(function(c){
+      if (c.stance === "SILENT" || rnd() > 0.14) return c; // each model wobbles on ~1 in 7 cells
+      var s = c.strength + (rnd() < .5 ? -25 : 25);
+      return {stance:c.stance, strength: Math.max(0, Math.min(100, s))};
+    })};
+  })};
+}
+function validatorsFor(r){
+  var lead = leaderRec(r), out = [{name:"V1", model:MODELS[0], leader:true, rec:lead, ok:true, state:"ok"}];
+  for (var k = 1; k < 5; k++){
+    var rec = C.deriveRecord(W, perturb(S.rounds[r].reading, 1000*(r+1)+k*37), flaggedFor(r));
+    var okk = C.recordsEquivalent(lead, rec); out.push({name:"V"+(k+1), model:MODELS[k], leader:false, rec:rec, ok:okk, state:okk?"ok":"bad"});
+  }
+  return out;
+}
+function statusColor(p){
+  if (p.status === "UNSUPPORTED") return "#77736a";
+  if (p.status.indexOf("AGREED") === 0) return "#8fd19e";
+  return p.divergence >= 80 ? "#ff5d4d" : (p.divergence >= 55 ? "#f08a3c" : "#e0b040");
+}
+function statusText(p){
+  if (p.status === "AGREED_TRUE") return "AGREED · TRUE";
+  if (p.status === "AGREED_FALSE") return "AGREED · FALSE";
+  if (p.status === "UNSUPPORTED") return "UNSUPPORTED";
+  return p.lean === "NONE" ? "DEADLOCKED" : "CONTESTED · leans " + p.lean;
+}
+
+/* ---------- map ---------- */
+var PX = 240, QX = 560, PW = 230, PH = 70, QW = 430, QH = 62;
+function py(i){ return 40 + i*140; }
+function qy(i){ return 14 + i*84; }
+function ribbonPath(pi, qi, ci, nCells){
+  var y1 = py(pi) + PH/2 + (qi-3)*5.5, y2 = qy(qi) + QH/2 + (ci-(nCells-1)/2)*7;
+  return "M"+PX+","+y1+" C"+(PX+170)+","+y1+" "+(QX-170)+","+y2+" "+QX+","+y2;
+}
+function drawMap(animate){
+  var rec = st.rec, g = [];
+  var active = st.round ? S.rounds[st.round-1].parties : [];
+  g.push('<defs><filter id="glow" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>');
+  // ribbons first (under nodes)
+  if (rec){
+    rec.props.forEach(function(p, qi){
+      p.cells.forEach(function(c, pi){
+        if (c.stance === "SILENT") return;
+        var col = c.stance === "AFFIRMS" ? "#4cc9c0" : "#ff7a59";
+        var w = 1.2 + c.strength/100*9;
+        var dim = st.sel !== null && st.sel !== qi ? " dim" : "";
+        var delay = animate ? (pi*0.12 + qi*0.07).toFixed(2) : 0;
+        g.push('<path class="ribbon'+(animate?' draw':'')+dim+'" pathLength="1" d="'+ribbonPath(pi,qi,pi,p.cells.length)+'" stroke="'+col+'" stroke-width="'+w.toFixed(1)+'" opacity="'+(0.35+c.strength/160).toFixed(2)+'" style="animation-delay:'+delay+'s" data-p="'+pi+'" data-q="'+qi+'"'+(st.rec.flagged.indexOf(pi)>=0?' filter="url(#glow)"':'')+'/>');
+      });
+    });
+  }
+  if (!rec && st.round){ // probing: every party toward every proposition while validators read
+    active.forEach(function(pi, k){ S.props.forEach(function(pr, qi){
+      g.push('<path class="ghost-ribbon" d="'+ribbonPath(pi, qi, k, active.length)+'" style="--gd:'+(-(pi*0.31+qi*0.13)).toFixed(2)+'s"/>');
+    }); });
+  }
+  // party nodes
+  S.parties.forEach(function(pt, i){
+    var live = active.indexOf(i) >= 0, ghost = st.round && !live;
+    var al = rec && rec.alignment[i] != null ? "aligned " + rec.alignment[i] + "%" : (live ? "" : (st.round===1 && i===3 ? "not yet submitted" : ""));
+    var flagged = rec && rec.flagged.indexOf(i) >= 0;
+    g.push('<g opacity="'+(ghost?0.35:1)+'"><rect x="10" y="'+py(i)+'" width="'+PW+'" height="'+PH+'" rx="2" fill="#13151a" stroke="'+(flagged?'#ff5d4d':pt.hue)+'" stroke-width="'+(flagged?2:1.4)+'"'+(ghost?' stroke-dasharray="5 5"':'')+'/>'
+      +'<rect x="10" y="'+py(i)+'" width="6" height="'+PH+'" rx="0" fill="'+pt.hue+'"/>'
+      +'<text x="30" y="'+(py(i)+27)+'" fill="#ece6d8" font-size="16" font-weight="650">'+esc(pt.name)+'</text>'
+      +'<text x="30" y="'+(py(i)+46)+'" fill="#a8a395" font-size="12.5" letter-spacing=".08em">'+esc(pt.role.toUpperCase())+'</text>'
+      +(al?'<text x="30" y="'+(py(i)+62)+'" fill="'+(flagged?'#ff5d4d':'#8a857a')+'" font-size="12.5">'+(flagged?'⚠ injection detected · weight capped':al)+'</text>':'')
+      +'</g>');
+  });
+  // proposition pods
+  S.props.forEach(function(pr, qi){
+    var p = rec ? rec.props[qi] : null, col = p ? statusColor(p) : "#3b3f4b", sel = st.sel === qi;
+    var tot = p ? p.affirm + p.deny : 0, aw = tot ? 200*p.affirm/tot : 0, dw = tot ? 200 - aw : 0;
+    g.push('<g class="pod'+(sel?' sel':'')+(animate&&p?' flash':'')+'" style="--fd:'+(0.7+qi*0.14).toFixed(2)+'s" data-q="'+qi+'" tabindex="0" role="button" aria-label="'+esc(pr.short)+(p?', '+statusText(p)+', divergence '+p.divergence+' percent':'')+'">'
+      +'<rect class="pbox" x="'+QX+'" y="'+qy(qi)+'" width="'+QW+'" height="'+QH+'" rx="2" fill="#13151a" stroke="'+(sel?'#e0b040':'#272a33')+'" stroke-width="1.4"/>'
+      +'<rect x="'+QX+'" y="'+qy(qi)+'" width="6" height="'+QH+'" rx="0" fill="'+col+'"'+(p&&p.status==='CONTESTED'?' class="pulse"':'')+'/>'
+      +'<text x="'+(QX+22)+'" y="'+(qy(qi)+24)+'" fill="#ece6d8" font-size="17" font-weight="650">'+esc(pr.short)+'</text>'
+      +'<text x="'+(QX+22)+'" y="'+(qy(qi)+46)+'" fill="'+col+'" font-size="12.5" font-weight="650" letter-spacing=".05em">'+(p?statusText(p):'AWAITING CONVENING')+'</text>'
+      +(p?'<text x="'+(QX+QW-18)+'" y="'+(qy(qi)+31)+'" text-anchor="end" fill="'+col+'" font-size="29" font-weight="700">'+p.divergence+'<tspan font-size="12" dx="2">%</tspan></text>'
+        +'<text x="'+(QX+QW-18)+'" y="'+(qy(qi)+48)+'" text-anchor="end" fill="#7d786c" font-size="10.5" letter-spacing=".12em">DIVERGENCE</text>'
+        +(tot?'<rect x="'+(QX+215)+'" y="'+(qy(qi)+14)+'" width="'+aw+'" height="4" rx="2" fill="#4cc9c0"/><rect x="'+(QX+215+aw)+'" y="'+(qy(qi)+14)+'" width="'+dw+'" height="4" rx="2" fill="#ff7a59"/>':'')
+        :'')
+      +'</g>');
+  });
+  $("map").innerHTML = g.join("");
+}
+
+/* ---------- panels ---------- */
+function drawAccounts(){
+  var active = st.round ? S.rounds[st.round-1].parties : [0,1,2];
+  $("accts").innerHTML = S.parties.map(function(pt, i){
+    var late = active.indexOf(i) < 0, inj = st.poisoned && i === S.poison.party;
+    return '<div class="acct'+(late?' late':'')+'" style="--c:'+pt.hue+'"><h3>'+esc(pt.name)+'</h3><div class="role">'+esc(pt.role)+(late?' · joins in round 2':'')+'</div>'
+      +'<p>'+esc(pt.account)+'</p>'+(pt.excerpt?'<p class="small" style="border-left:2px solid var(--line2);padding-left:9px"><b>Attached evidence</b> · '+esc(pt.excerpt)+'</p>':'')+pt.evidence.map(function(e){return '<span class="ev">⧉ '+esc(e)+'</span>';}).join("")
+      +(inj?'<div class="inj"><b>Fetched evidence contains</b>'+esc(S.poison.text)+'</div>':'')+'</div>';
+  }).join("");
+}
+function realVals(r){
+  var rr = R.rounds[r], out = [{name:"Leader", model:rr.leaderModel, leader:true, rec:rr.rec, state:"ok", vote:"proposed"}];
+  rr.validators.forEach(function(v, i){ out.push({name:"V"+(i+1), model:v.model, leader:false, rec:null, vote:v.vote, state: v.vote==="agree"?"ok":(v.vote==="idle"?"idle":"bad")}); });
+  return out.slice(0,5);
+}
+function drawVals(reveal, checked){
+  var r = Math.max(0, st.round-1);
+  $("vals").innerHTML = st.vals.map(function(v, i){
+    var bars = !v.rec ? '<div class="small" style="width:100%;align-self:center;text-align:center">own reading not exposed in receipts</div>' : v.rec.props.map(function(p){
+      return '<i style="height:'+Math.max(8, p.status==='UNSUPPORTED'?100:p.divergence)+'%;background:'+statusColor(p)+'" title="'+esc(S.props[p.index].short)+': '+p.divergence+'%"></i>';
+    }).join("");
+    var cls = checked ? (v.state==="idle" ? " idle" : (v.state==="ok" ? " ok" : " bad")) : "";
+    return '<div class="val'+cls+'"><div class="vh"><b>'+v.name+(v.leader?' · leader':'')+'</b><span>'+v.model+'</span></div>'
+      +'<div class="bars'+(reveal?' on':'')+'">'+bars+'</div>'
+      +'<div class="vf"><span>'+(v.rec?'index '+(reveal?v.rec.ambiguity:'..'):'vote')+'</span><span class="mark" style="color:'+(checked?(v.state==="ok"?'#8fd19e':(v.state==="idle"?'#a8a395':'#ff5d4d')):'#6e6a60')+'">'+(checked?(mode==="real"?(v.leader?'✓ proposed':(v.vote==="agree"?'✓ agree':(v.vote==="idle"?'idle':'✗ '+v.vote))):(v.ok?'✓ agrees':'✗ differs')):(reveal?'read':'reading…'))+'</span></div></div>';
+  }).join("");
+}
+function setBanner(txt, cls){ var b = $("banner"); b.className = "banner " + (cls||""); b.innerHTML = txt; }
+
+function tween(el, to, fmt){
+  var from = parseFloat(el.dataset.v || "0") || 0; el.dataset.v = to;
+  if (reduce){ el.textContent = fmt(to); return; }
+  var t0 = performance.now(), d = 1100;
+  (function f(t){ var k = Math.min(1,(t-t0)/d), e = 1-Math.pow(1-k,3); el.textContent = fmt(Math.round(from+(to-from)*e)); if (k<1) requestAnimationFrame(f); })(t0);
+}
+function drawMetrics(){
+  var rec = st.rec, mk = $("mark");
+  if (!rec){ $("amb").textContent = "--"; mk.style.left = "0%"; mk.style.opacity = ".25"; $("cA").textContent = $("cC").textContent = $("cU").textContent = "-"; return; }
+  tween($("amb"), rec.ambiguity, String);
+  mk.style.opacity = "1"; mk.style.left = rec.ambiguity + "%";
+  tween($("cA"), rec.agreed, String); tween($("cC"), rec.contested, String); tween($("cU"), rec.unsupported, String);
+}
+function drawTraj(){
+  var h = st.history, svg = $("traj");
+  if (!h.length){ svg.innerHTML = '<line x1="0" y1="35" x2="300" y2="35" stroke="#272a33" stroke-dasharray="3 4"/>'; $("trajLbl").textContent = "Ambiguity trajectory"; return; }
+  var pts = h.map(function(a, i){ return [h.length===1?150:20+i*(260/(h.length-1)), 8+(a/100)*54]; });
+  var d = pts.map(function(p,i){return (i?"L":"M")+p[0].toFixed(1)+","+p[1].toFixed(1);}).join(" ");
+  svg.innerHTML = '<line x1="0" y1="62" x2="300" y2="62" stroke="#272a33"/><path d="'+d+'" fill="none" stroke="#e0b040" stroke-width="2.5" stroke-linecap="square" vector-effect="non-scaling-stroke"/>'
+    + pts.map(function(p,i){return '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="4" fill="#ece6d8" vector-effect="non-scaling-stroke"/>';}).join("");
+  $("trajLbl").innerHTML = "Ambiguity trajectory &middot; " + h.map(function(a,i){return "round "+(i+1)+": <b style='color:#ece6d8'>"+a+"</b>";}).join(" → ");
+}
+function drawTriage(){
+  var rec = st.rec;
+  if (!rec){ $("tri").innerHTML = '<div class="empty">Convene the validators to see the triage.</div>'; return; }
+  var list = rec.props.filter(function(p){return p.status !== "AGREED_TRUE" && p.status !== "AGREED_FALSE";})
+    .sort(function(a,b){return b.weight*b.divergence - a.weight*a.divergence;});
+  if (!list.length){ $("tri").innerHTML = '<div class="empty">Nothing contested. The record is settled.</div>'; return; }
+  $("tri").innerHTML = list.map(function(p){
+    var fix = RESOLVABLE[p.cause];
+    return '<div class="tr" data-q="'+p.index+'"><div class="t1"><span>'+esc(S.props[p.index].short)+'</span><span>'+p.divergence+'%</span></div>'
+      +(p.crux?'<div class="crux">'+esc(p.crux)+'</div>':'')
+      +(p.cause!=="NONE"?'<span class="tag">'+CAUSE[p.cause]+'</span>':'')
+      +(p.cause==="NONE"?'':'<span class="tag '+(fix?'fix':'rule')+'">'+(fix?'more evidence can settle this':'needs a ruling → appeal')+'</span>')+'</div>';
+  }).join("");
+}
+function naive(p){
+  var a = 0, d = 0; p.cells.forEach(function(c){ if (c.stance==="AFFIRMS") a++; else if (c.stance==="DENIES") d++; });
+  return a > d ? "TRUE" : (d > a ? "FALSE" : "TIE");
+}
+function releasePct(){ return st.rec ? C.releaseFraction(st.rec.props, S.action.reqProps, S.action.reqWants, S.action.minClarity) : 0; }
+function drawEscrow(){
+  var A = S.action, E = S.escrow, pct = releasePct(), target = Math.floor(E*pct/100), avail = Math.max(0, target - st.paid);
+  $("escNote").textContent = A.title + ". " + A.note;
+  tween($("escPaid"), st.paid, function(n){ return n.toLocaleString(); }); $("escOf").textContent = "of " + E.toLocaleString() + " GEN released";
+  var bar = $("escBar").children;
+  bar[0].style.width = (st.paid/E*100)+"%"; bar[1].style.width = (avail/E*100)+"%"; bar[2].style.width = ((E-st.paid-avail)/E*100)+"%";
+  $("escLeg").innerHTML = st.rec ? "Paid " + st.paid + " &middot; releasable now <b style='color:#e0b040'>"+avail+"</b> &middot; reserved " + (E-st.paid-avail) : "Paid &middot; releasable now &middot; reserved until the facts settle";
+  $("reqs").innerHTML = A.reqProps.map(function(qi, k){
+    var p = st.rec && st.rec.props[qi], want = A.reqWants[k], ok = p && p.lean === want && p.clarity >= A.minClarity;
+    var cl = ok ? p.clarity : 0, col = ok ? (cl >= 80 ? "#8fd19e" : "#e0b040") : "#77736a";
+    return '<div class="req"><span>'+esc(S.props[qi].short)+' <span class="small">→ want '+want+'</span></span><div class="meter"><i style="width:'+cl+'%;background:'+col+'"></i></div><span class="st">'+(p?(ok?cl+'%':'✗ '+p.lean.toLowerCase()):'--')+'</span></div>';
+  }).join("");
+  $("exec").disabled = !(st.rec && avail > 0 && !st.busy);
+  $("exec").textContent = avail > 0 ? "Execute release · +" + avail + " GEN" : "Execute release";
+  $("log").innerHTML = st.log.map(function(l){return "<div>"+l+"</div>";}).reverse().join("");
+}
+function drawVs(){
+  var rec = st.rec;
+  if (!rec){ $("vs").innerHTML = '<div class="empty">Convene the validators to compare.</div>'; return; }
+  var hidden = 0, rows = rec.props.map(function(p){
+    var n = naive(p), lost = n !== "TIE" && p.status === "CONTESTED"; if (lost) hidden++;
+    return {p:p, n:n, lost:lost};
+  });
+  var A = S.action, allOk = A.reqProps.every(function(qi, k){ return naive(rec.props[qi]) === A.reqWants[k]; });
+  var pct = releasePct();
+  $("vs").innerHTML =
+   '<div class="col old"><h3>Majority-vote oracle</h3><div class="small">One answer per question. Strength of evidence and the size of the dissent are discarded.</div><div class="rows">'
+   + rows.map(function(r){return '<div class="rw'+(r.lost?' lost':'')+'"><span>'+esc(S.props[r.p.index].short)+'</span><b style="color:'+(r.n==="TIE"?'#a8a395':'#ece6d8')+'">'+r.n+'</b></div>';}).join("")
+   + '</div><div class="callout old"><b>'+hidden+' live disputes hidden</b> behind confident answers. The escrow can only pay <b>'+(allOk?'100%':'0%')+'</b>: all or nothing.</div></div>'
+   +'<div class="col new"><h3>Concordance record</h3><div class="small">Settled facts, contested facts, how contested, and why.</div><div class="rows">'
+   + rows.map(function(r){var p=r.p;return '<div class="rw"><span>'+esc(S.props[p.index].short)+'</span><b style="color:'+statusColor(p)+'">'+(p.status.indexOf("AGREED")===0?'agreed':p.status==="UNSUPPORTED"?'unsupported':p.divergence+'% apart')+'</b></div>';}).join("")
+   + '</div><div class="callout new">The same record releases <b>'+pct+'%</b> now and the rest as the facts settle, with a map of which disputes more evidence can close.</div></div>';
+}
+function showDetail(qi){
+  var p = st.rec && st.rec.props[qi]; if (!p) return;
+  var act = S.rounds[st.round-1].parties;
+  var lines = p.cells.map(function(c, i){
+    return c.stance === "SILENT" ? null : S.parties[i].name + " " + (c.stance==="AFFIRMS"?"affirms":"denies") + " (strength " + c.strength + ")";
+  }).filter(Boolean).join(" · ");
+  setBanner('<b>'+esc(S.props[qi].text)+'</b>&nbsp; '+esc(lines)+(p.crux?' — <i>'+esc(p.crux)+'</i>':''), p.status==="CONTESTED"?"warn":"good");
+}
+function select(qi){
+  st.sel = st.sel === qi ? null : qi; drawMap(false);
+  if (st.sel !== null) showDetail(qi);
+  bindMap();
+}
+
+/* ---------- tooltip + events ---------- */
+function bindMap(){
+  var tip = $("tip");
+  Array.prototype.forEach.call(document.querySelectorAll("#map .pod"), function(el){
+    el.addEventListener("pointerenter", function(){ if (!st.rec || st.sel !== null) return; var q = el.dataset.q, m = $("map"); m.classList.add("hover-dim"); Array.prototype.forEach.call(m.querySelectorAll(".ribbon"), function(r){ r.classList.toggle("hi", r.dataset.q === q); }); });
+    el.addEventListener("pointerleave", function(){ var m = $("map"); m.classList.remove("hover-dim"); Array.prototype.forEach.call(m.querySelectorAll(".ribbon.hi"), function(r){ r.classList.remove("hi"); }); });
+    el.addEventListener("click", function(){ if (st.rec) select(+el.dataset.q); });
+    el.addEventListener("keydown", function(e){ if ((e.key==="Enter"||e.key===" ") && st.rec){ e.preventDefault(); select(+el.dataset.q); }});
+  });
+  Array.prototype.forEach.call(document.querySelectorAll("#map .ribbon"), function(el){
+    el.addEventListener("pointerenter", function(){
+      var pi = +el.dataset.p, qi = +el.dataset.q, c = st.rec.props[qi].cells[pi];
+      tip.innerHTML = "<b style='color:"+(c.stance==="AFFIRMS"?"#4cc9c0":"#ff7a59")+"'>"+esc(S.parties[pi].name)+" "+(c.stance==="AFFIRMS"?"affirms":"denies")+"</b>"+esc(S.props[qi].short)+" · evidence strength "+c.strength+(st.rec.flagged.indexOf(pi)>=0?" (capped by injection scan)":"");
+      tip.style.opacity = 1;
+    });
+    el.addEventListener("pointermove", function(e){ tip.style.left = Math.min(window.innerWidth-280, e.clientX+14)+"px"; tip.style.top = (e.clientY+14)+"px"; });
+    el.addEventListener("pointerleave", function(){ tip.style.opacity = 0; });
+  });
+}
+
+/* ---------- the convening ---------- */
+async function convene(){
+  if (st.busy || st.round >= S.rounds.length) return;
+  st.busy = true; $("go").disabled = true; st.sel = null;
+  var r = st.round; // index of the round about to run
+  st.round = r + 1;
+  st.vals = mode === "real" ? realVals(r) : validatorsFor(r);
+  drawAccounts();
+  setBanner(mode === "real" ? "Round "+(r+1)+": replaying a recorded GenLayer Studio transaction. The leader's model reads all "+S.rounds[r].parties.length+" accounts; validators re-run and vote…" : "Round "+(r+1)+": every validator fetches the evidence and reads all "+S.rounds[r].parties.length+" accounts on its own model…");
+  st.rec = null; drawMap(false); bindMap(); drawMetrics(); drawVals(false, false); drawEscrow(); drawVs(); drawTriage();
+  var hunt = null, mk = $("mark"), ab = $("amb");
+  if (!reduce){ // the needle hunts for the pitch while validators read, then settles
+    mk.classList.add("hunt"); ab.classList.add("hunting"); mk.style.opacity = "1";
+    hunt = setInterval(function(){ var n = 14 + Math.round(Math.random() * 78); mk.style.left = n + "%"; ab.textContent = n; ab.dataset.v = n; }, 430);
+  }
+  await sleep(900);
+  for (var i = 0; i < 5; i++){ await sleep(380); var bars = document.querySelectorAll(".bars")[i]; if (bars) bars.classList.add("on"); }
+  drawVals(true, false);
+  await sleep(700);
+  setBanner("Equivalence check: does each validator's record match the leader's within tolerance?");
+  for (var k = 0; k < st.vals.length; k++){ await sleep(260); var vs = st.vals[k].state; document.querySelectorAll(".val")[k].classList.add(vs === "idle" ? "idle" : (vs === "ok" ? "ok" : "bad")); }
+  drawVals(true, true);
+  var agree = st.vals.filter(function(v){return v.state === "ok";}).length;
+  await sleep(450);
+  if (hunt){ clearInterval(hunt); mk.classList.remove("hunt"); ab.classList.remove("hunting"); }
+  st.rec = st.vals[0].rec;
+  st.history.push(st.rec.ambiguity);
+  var msg = agree === 5 ? "Consensus 5/5." : "Consensus "+agree+"/5. The dissent is recorded and outvoted.";
+  if (mode === "real"){
+    var rr = R.rounds[r], ag = rr.validators.filter(function(v){return v.vote==="agree";}).length, idl = rr.validators.filter(function(v){return v.vote==="idle";}).length, dis = rr.validators.filter(function(v){return v.vote==="disagree";}).length;
+    setBanner("<b>On-chain: "+esc(rr.status)+" · "+esc(rr.result)+" in "+rr.rounds+" consensus round.</b> "+ag+" validators agreed, "+idl+" did not vote (idle), "+dis+" disagreed. Leader model: "+esc(rr.leaderModel)+". Ambiguity index "+st.rec.ambiguity+" (the scripted story said "+(r===0?68:38)+"). tx "+esc(rr.hash.slice(0,10))+"…", dis ? "warn" : "good");
+  } else if (agree >= 4) setBanner("<b>"+msg+"</b> The network agrees on the world model: "+st.rec.agreed+" agreed, "+st.rec.contested+" contested, ambiguity index "+st.rec.ambiguity+".", "good");
+  else setBanner("<b>"+msg+"</b> Not enough agreement: the transaction would go to appeal with a larger validator set.", "bad");
+  drawMap(true); bindMap(); drawMetrics(); drawTraj(); drawTriage(); drawVs(); drawEscrow(); drawAccounts(); drawSpread();
+  st.busy = false; $("go").disabled = false; updateGo(); drawEscrow();
+}
+function updateGo(){
+  var b = $("go");
+  if (st.round === 0) b.textContent = "Convene validators · round 1";
+  else if (st.round < S.rounds.length) b.textContent = "New evidence arrives → reconvene (round 2)";
+  else { b.textContent = "Both rounds done"; b.disabled = true; }
+}
+async function execute(){
+  if (st.busy || !st.rec) return;
+  var pct = releasePct(), target = Math.floor(S.escrow*pct/100), delta = Math.max(0, target - st.paid);
+  if (!delta) return;
+  st.paid += delta; st.log.push("Round "+st.round+": model justifies <b>"+pct+"%</b> → released <b>+"+delta+" GEN</b> (total "+st.paid+"). Releases only ratchet up."+(mode==="real"&&st.round===2?" On Studio this same record released "+R.escrowObserved.pct+"% = "+R.escrowObserved.paid.toLocaleString()+" of "+R.escrowObserved.of.toLocaleString()+" wei (docs/ONCHAIN.md).":""));
+  drawEscrow();
+}
+function reset(){
+  st = {round:0, poisoned:$("poison").checked, busy:false, rec:null, history:[], paid:0, sel:null, vals:[], log:[]};
+  $("go").disabled = false; updateGo(); drawAccounts(); drawMap(false); bindMap(); drawMetrics(); drawTraj(); drawTriage(); drawVs(); drawEscrow(); drawVals(false,false);
+  $("vals").innerHTML = ""; setBanner("Waiting for the first convening."); drawSpread();
+}
+function onPoison(){
+  if (mode === "real") return;
+  var on = $("poison").checked; st.poisoned = on; $("poisonLbl").classList.toggle("on", on);
+  drawAccounts();
+  if (st.round && !st.busy){
+    st.vals = validatorsFor(st.round-1); st.rec = st.vals[0].rec; st.history[st.history.length-1] = st.rec.ambiguity;
+    drawVals(true, true); drawMap(true); bindMap(); drawMetrics(); drawTraj(); drawTriage(); drawVs(); drawEscrow();
+    setBanner(on ? "<b>Greybox scan flagged Halden's evidence.</b> Instruction-like text was found; Halden's evidence weight is capped at 25 before anything is derived. The attack lost Halden influence instead of gaining it. (Ambiguity moved because a voice was muted, not because anything was resolved.)" : "Attack removed. Record re-derived.", on ? "bad" : "good");
+  } else if (on) setBanner("Attack armed. Convene to watch the greybox scan neutralize it.", "warn");
+}
+
+var LETTER = {AGREED_TRUE:"A",AGREED_FALSE:"A",CONTESTED:"C",UNSUPPORTED:"U"};
+function strictOld(a, b){ return a.props.every(function(x, i){ var y = b.props[i]; return x.status === y.status && Math.abs(x.divergence - y.divergence) <= 30; }); }
+function drawSpread(){
+  var card = $("spreadCard");
+  if (mode !== "real" || !st.round){ card.hidden = true; return; }
+  var sp = R.spread[st.round-1], ms = sp.models; card.hidden = false;
+  $("spreadSub").textContent = "Round "+st.round+" inputs were identical. Each leader rotation ran a different model, and this is what each one read. Letters: A agreed, C contested, U unsupported; the number is divergence %.";
+  $("spread").innerHTML = ms.map(function(m){
+    return '<div class="sp"><span>'+esc(m.model)+'</span><b>'+m.rec.ambiguity+'</b><div class="cells">'+m.rec.props.map(function(p){
+      return '<i style="background:'+statusColor(p)+'" title="'+esc(S.props[p.index].short)+': '+p.status+' · '+p.divergence+'%">'+LETTER[p.status]+(p.status==="CONTESTED"?p.divergence:'')+'</i>'; }).join("")+'</div></div>';
+  }).join("");
+  var n = 0, oldOk = 0, newOk = 0;
+  for (var i = 0; i < ms.length; i++) for (var j = i+1; j < ms.length; j++){ n++; if (strictOld(ms[i].rec, ms[j].rec)) oldOk++; if (C.recordsEquivalent(ms[i].rec, ms[j].rec)) newOk++; }
+  $("spreadNote").className = "banner warn";
+  $("spreadNote").innerHTML = "<span><b>Of "+n+" model pairs:</b> the original per-proposition rule would have accepted <b>"+oldOk+"</b>; the current coarse rule accepts <b>"+newOk+"</b>. Cell by cell they differ a lot; on the overall ambiguity index they sit closer ("+Math.min.apply(null, ms.map(function(m){return m.rec.ambiguity;}))+"–"+Math.max.apply(null, ms.map(function(m){return m.rec.ambiguity;}))+" here). That is why consensus ratifies the index and coarse classes, not the per-proposition map.</span>";
+}
+function setMode(m){
+  mode = m; $("mScripted").setAttribute("aria-pressed", m==="scripted"); $("mReal").setAttribute("aria-pressed", m==="real");
+  $("poison").disabled = m === "real"; if (m === "real"){ $("poison").checked = false; $("poisonLbl").classList.remove("on"); }
+  $("poisonLbl").title = m === "real" ? "The attack demo needs the scripted readings (the real receipts hold records, not raw readings)." : "";
+  $("srcnote").innerHTML = m === "real"
+    ? "<b>Real Studio validators.</b> Recorded GenLayer Studio transactions: real models, real votes, messier numbers. The map shows the on-chain record; the escrow runs on it."
+    : "<b>Scripted narrative.</b> Hand-written readings, tuned to tell the clearest story. Switch to see what real validators returned.";
+  reset();
+}
+$("mScripted").addEventListener("click", function(){ if (mode !== "scripted" && !st.busy) setMode("scripted"); });
+$("mReal").addEventListener("click", function(){ if (mode !== "real" && !st.busy) setMode("real"); });
+$("question").textContent = S.question;
+$("go").addEventListener("click", convene);
+$("exec").addEventListener("click", execute);
+$("reset").addEventListener("click", reset);
+$("poison").addEventListener("change", onPoison);
+$("tri").addEventListener("click", function(e){ var t = e.target.closest(".tr"); if (t && st.rec){ select(+t.dataset.q); document.getElementById("map").scrollIntoView({block:"center",behavior:reduce?"auto":"smooth"}); }});
+/* ---------- the 60-second tour: drives the same functions a person would click ---------- */
+var tour = {on:false, stop:false, paused:false, t0:0};
+var TOUR_N = 9;
+function tw(ms){ // wait that honours Pause and Stop
+  return new Promise(function(resolve, reject){
+    var t = 0, h = setInterval(function(){
+      if (tour.stop){ clearInterval(h); reject("stop"); return; }
+      if (!tour.paused) t += 100;
+      if (t >= ms){ clearInterval(h); resolve(); }
+    }, 100);
+  });
+}
+function look(el, where){ // absolute target: a number is the offset from the top of the viewport, otherwise centre the element
+  var e = typeof el === "string" ? $(el) : el; if (!e) return;
+  var r = e.getBoundingClientRect(), top = typeof where === "number" ? r.top + window.scrollY - where : r.top + window.scrollY - Math.max(20, (window.innerHeight - r.height) / 2 - 40);
+  window.scrollTo({top: Math.max(0, top), behavior: reduce ? "auto" : "smooth"});
+}
+function tcap(i, html){ $("tstep").textContent = "Step "+i+"/"+TOUR_N; $("tcap").innerHTML = html; $("tprog").style.width = (i/TOUR_N*100)+"%"; }
+function spreadStats(i){
+  var ms = R.spread[i].models, n = 0, o = 0, c2 = 0;
+  for (var a = 0; a < ms.length; a++) for (var b = a+1; b < ms.length; b++){ n++; if (strictOld(ms[a].rec, ms[b].rec)) o++; if (C.recordsEquivalent(ms[a].rec, ms[b].rec)) c2++; }
+  return {n:n, oldOk:o, newOk:c2};
+}
+async function runTour(){
+  if (tour.on) return;
+  tour = {on:true, stop:false, paused:false, t0:Date.now()};
+  document.body.classList.add("touring"); $("tour").hidden = false; $("tpause").textContent = "Pause";
+  var done = false;
+  try {
+    if (st.busy) throw "stop";
+    if ($("poison").checked){ $("poison").checked = false; }
+    setMode("scripted");
+    look("mScripted", 80);
+    tcap(1, "<b>Scripted story.</b> Four parties tell different stories about a late, possibly warm container. A normal oracle returns one answer. Watch what Concordance keeps."); await tw(4000);
+    tcap(2, "<b>Round 1.</b> Five validators on five different models read every account independently, then the network checks they agree."); look("map", 90);
+    await convene();
+    tcap(3, "<b>The agreement map.</b> "+st.rec.agreed+" facts settled, "+st.rec.contested+" contested, ambiguity index <b>"+st.rec.ambiguity+"</b>. Ribbons show who asserts what and how well it is evidenced. Cold chain is the live fight."); select(3); await tw(4500); select(3);
+    tcap(4, "<b>Triage.</b> It also says <i>why</i> parties differ. Disputes over facts can be settled with more evidence; disputes over meaning need a ruling."); look("tri"); await tw(4000);
+    tcap(5, "<b>Priced ambiguity.</b> The escrow releases in proportion to how settled the facts are: <b>"+releasePct()+"%</b> now, never all-or-nothing."); look("exec"); await tw(1200); await execute(); await tw(3200);
+    tcap(6, "<b>Round 2.</b> The surveyor and the harbour log join. Reconvene."); look("map", 90);
+    await convene();
+    tcap(6, "Ambiguity falls to <b>"+st.rec.ambiguity+"</b>; the model now justifies <b>"+releasePct()+"%</b>. Escrow releases the increment and never claws back."); look("exec"); await tw(1200); await execute(); await tw(3800);
+    tcap(7, "<b>Greybox.</b> Halden's evidence now contains an injected instruction. The scan flags it and caps that party's weight, so the attacker loses influence."); look("map", 90);
+    $("poison").checked = true; onPoison(); await tw(4200); $("poison").checked = false; onPoison();
+    tcap(8, "<b>Now the real thing.</b> Recorded transactions from GenLayer Studio: real models, real votes, messier numbers."); setMode("real"); look("mReal", 80); await tw(2200);
+    await convene(); await convene();
+    var sp = spreadStats(1);
+    tcap(8, "Same inputs, four different models. Cell by cell they disagree: the original per-proposition rule would have accepted <b>"+sp.oldOk+" of "+sp.n+"</b> pairs. They agree far better on the overall index, so consensus now ratifies <b>that</b>."); look("spreadCard", 20); await tw(6500);
+    tcap(9, "<b>Honest status.</b> On Studio, 6 of 6 convenes reached majority agreement and the escrow paid exactly what this page predicts. Not yet run on Bradbury; real ambiguity was noisier than the script."); look("map", 90); await tw(5000);
+    done = true;
+  } catch (e) { if (e !== "stop") throw e; }
+  var secs = Math.round((Date.now() - tour.t0) / 1000);
+  tour.on = false; document.body.classList.remove("touring"); window.__tourSeconds = secs;
+  $("tprog").style.width = done ? "100%" : $("tprog").style.width;
+  $("tstep").textContent = done ? "Tour done" : "Stopped";
+  $("tcap").innerHTML = (done ? "That was the tour ("+secs+"s). " : "") + "Everything on the page is live: switch the source, convene, execute, or poke the attack toggle. <button id=\"treplay\" style=\"margin-left:8px\">Replay tour</button> <button id=\"tclose\">Close</button>";
+  $("treplay").onclick = function(){ $("tour").hidden = true; runTour(); };
+  $("tclose").onclick = function(){ $("tour").hidden = true; };
+}
+$("tourBtn").addEventListener("click", runTour);
+$("tpause").addEventListener("click", function(){ tour.paused = !tour.paused; $("tpause").textContent = tour.paused ? "Resume" : "Pause"; });
+$("tstop").addEventListener("click", function(){ if (tour.on) tour.stop = true; else $("tour").hidden = true; });
+document.addEventListener("keydown", function(e){ if (e.key === "Escape" && tour.on) tour.stop = true; });
+
+document.documentElement.classList.add("js");
+(function(){ // staggered reveals as sections enter view
+  var els = [].slice.call(document.querySelectorAll(".hero>*, .q, .grid .card, .card.sec, .why>div"));
+  els.forEach(function(e, i){ e.classList.add("reveal"); e.style.setProperty("--d", (Math.min(i % 6, 5) * 0.07).toFixed(2) + "s"); });
+  if (!("IntersectionObserver" in window)){ els.forEach(function(e){ e.classList.add("in"); }); return; }
+  var io = new IntersectionObserver(function(en){ en.forEach(function(x){ if (x.isIntersecting){ x.target.classList.add("in"); io.unobserve(x.target); } }); }, {threshold:.06, rootMargin:"0px 0px -3% 0px"});
+  els.forEach(function(e){ io.observe(e); });
+})();
+setMode("scripted");
+})();
+</script>
+</body>
+</html>

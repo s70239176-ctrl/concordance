@@ -1,0 +1,74 @@
+[
+  {
+    "inquiry": "halden-mvf31ix5",
+    "label": "round1",
+    "hash": "0x6539cd6ec626f7c99b45db42147ddba34d630c2af5c35a9fde531583e431d380",
+    "status": "ACCEPTED",
+    "result": "MAJORITY_AGREE",
+    "rounds": "1",
+    "ms": 53164,
+    "leaderVote": null,
+    "validatorVotes": [
+      "agree",
+      "agree",
+      "agree",
+      "idle"
+    ],
+    "n": 4,
+    "ambiguity": 74
+  },
+  {
+    "inquiry": "halden-mvf31ix5",
+    "label": "round2",
+    "hash": "0x7e63a8360ca9dc1dfc99cfed0c2ed54b6e794f6dfc571c48dddb64632c63678b",
+    "status": "ACCEPTED",
+    "result": "MAJORITY_AGREE",
+    "rounds": "1",
+    "ms": 35886,
+    "leaderVote": null,
+    "validatorVotes": [
+      "idle",
+      "agree",
+      "idle",
+      "agree"
+    ],
+    "n": 4,
+    "ambiguity": 71
+  },
+  {
+    "inquiry": "halden-mvf34cn7",
+    "label": "round1",
+    "hash": "0x0fe9510d25bf5eb8a520f8c973282a1e6c4c0c899670084b011bf92fcadbc0f8",
+    "status": "ACCEPTED",
+    "result": "MAJORITY_AGREE",
+    "rounds": "1",
+    "ms": 35030,
+    "leaderVote": null,
+    "validatorVotes": [
+      "agree",
+      "idle",
+      "agree",
+      "idle"
+    ],
+    "n": 4,
+    "ambiguity": 60
+  },
+  {
+    "inquiry": "halden-mvf34cn7",
+    "label": "round2",
+    "hash": "0x2889d4e78a354f6164b2c9d1618f9c74bd4d5e78b65a18336a3cbca0e2e43291",
+    "status": "ACCEPTED",
+    "result": "MAJORITY_AGREE",
+    "rounds": "1",
+    "ms": 26634,
+    "leaderVote": null,
+    "validatorVotes": [
+      "idle",
+      "agree",
+      "agree",
+      "idle"
+    ],
+    "n": 4,
+    "ambiguity": 82
+  }
+]

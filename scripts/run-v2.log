@@ -1,0 +1,6 @@
+--- inquiry halden-mvf2eics
+{"inquiry":"halden-mvf2eics","label":"round1","hash":"0x7840f2d88a0d8fdac611f1f12dd4f360cce32e36bb69ab5298c824e984d5b35e","status":"UNDETERMINED","result":"MAJORITY_DISAGREE","rounds":"4","ms":215491,"leaderVote":null,"validatorVotes":["disagree","disagree","idle","disagree"],"n":4}
+{"inquiry":"halden-mvf2eics","label":"round2","hash":"0x3e84deebd44df8d90bb7c5893b53ed371037053578258f0187c3397cc6e54323","status":"UNDETERMINED","result":"MAJORITY_DISAGREE","rounds":"4","ms":280020,"leaderVote":null,"validatorVotes":["disagree","idle","idle","disagree"],"n":4}
+--- inquiry halden-mvf2v6ju
+erVote":null,"validatorVotes":["idle","disagree","disagree","disagree"],"n":4}
+--- inquiry halden-mvf2k785

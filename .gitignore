@@ -1,0 +1,15 @@
+node_modules/
+# throwaway testnet keys and local run state: never commit
+scripts/.accounts.json
+scripts/.state.json
+scripts/.env
+.env
+.claude/
+__pycache__/
+.pytest_cache/
+*.pyc
+# generated duplicates / bulky receipts
+scripts/sample-consensus.json
+scripts/records*.json
+scripts/_cases.json
+tests/_cases.json

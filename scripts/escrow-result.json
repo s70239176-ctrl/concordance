@@ -1,0 +1,98 @@
+{
+  "aid": "esc-mvf4fmy5",
+  "inquiry": "halden-mvf4dd20",
+  "address": "0x58E8b84B0b55e9d4d33e5E973CF41D475919ECc7",
+  "log": [
+    {
+      "k": "on-chain ambiguity",
+      "v": 79
+    },
+    {
+      "k": "expected release pct (derive.js)",
+      "v": 18
+    },
+    {
+      "k": "expected first payout",
+      "v": "180000"
+    },
+    {
+      "k": "balances before",
+      "v": {
+        "beneficiary": "0",
+        "funder": "0"
+      }
+    },
+    {
+      "k": "open_action",
+      "v": "ACCEPTED/MAJORITY_AGREE exec=SUCCESS"
+    },
+    {
+      "k": "action stored",
+      "v": {
+        "escrow": 1000000,
+        "paid": 0,
+        "status": "OPEN"
+      }
+    },
+    {
+      "k": "execute_action #1 (stranger)",
+      "v": "ACCEPTED/MAJORITY_AGREE exec=SUCCESS"
+    },
+    {
+      "k": "paid after #1",
+      "v": 180000
+    },
+    {
+      "k": "execute_action #2 (no new clarity)",
+      "v": "ACCEPTED/MAJORITY_AGREE exec=ERROR"
+    },
+    {
+      "k": "paid after #2 (must be unchanged)",
+      "v": 180000
+    },
+    {
+      "k": "close_action while open (refuse)",
+      "v": "ACCEPTED/MAJORITY_AGREE exec=ERROR"
+    },
+    {
+      "k": "close_inquiry by stranger (refuse)",
+      "v": "ACCEPTED/MAJORITY_AGREE exec=ERROR"
+    },
+    {
+      "k": "close_inquiry by opener",
+      "v": "ACCEPTED/MAJORITY_AGREE exec=SUCCESS"
+    },
+    {
+      "k": "close_action by stranger (refuse)",
+      "v": "ACCEPTED/MAJORITY_AGREE exec=ERROR"
+    },
+    {
+      "k": "close_action by funder",
+      "v": "ACCEPTED/MAJORITY_AGREE exec=SUCCESS"
+    },
+    {
+      "k": "final action",
+      "v": {
+        "status": "CLOSED",
+        "escrow": 1000000,
+        "paid": 180000
+      }
+    },
+    {
+      "k": "beneficiary gained",
+      "v": "180000"
+    },
+    {
+      "k": "funder balance change",
+      "v": "820000"
+    },
+    {
+      "k": "expected: beneficiary",
+      "v": "180000"
+    },
+    {
+      "k": "expected: refund",
+      "v": "820000"
+    }
+  ]
+}
