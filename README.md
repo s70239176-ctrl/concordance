@@ -80,6 +80,11 @@ genlayer deploy --contract contracts/concordance.py
 Or use the scripts (throwaway key generated locally): `npm install && node scripts/deploy.mjs &&
 node scripts/measure.mjs 2 && node scripts/extract-records.mjs`.
 
+## Deploy the frontend (Vercel)
+The UI is static files in `web/`, no build step. `vercel.json` at the repo root points Vercel at `web/`, so importing
+the repo works as is. (Alternative: leave `vercel.json` out and set **Root Directory** to `web` in the project
+settings, Framework Preset "Other".) Pages: `/` is the showcase demo, `/app` is the live app.
+
 ## Prior art (checked October 2026)
 Single-verdict escrow and court projects, precedent registries and charter gates exist on GenLayer. I did not find
 a contract that records partial agreement and quantified dissent as the consensus output. Absence of evidence in
