@@ -84,3 +84,6 @@ node scripts/measure.mjs 2 && node scripts/extract-records.mjs`.
 Single-verdict escrow and court projects, precedent registries and charter gates exist on GenLayer. I did not find
 a contract that records partial agreement and quantified dissent as the consensus output. Absence of evidence in
 a shallow search, not proof; check the Agent Tank / Bradbury entry lists before claiming novelty.
+
+## License
+MIT. See `LICENSE`.
