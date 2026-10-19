@@ -1,38 +1,38 @@
 [
   {
-    "inquiry": "halden-mvf4dd20",
+    "inquiry": "halden-mvfuuv3l",
     "label": "round1",
-    "hash": "0x4157a2e1892372f2e8911444826a3f4270ef9e05b6b9bb587a6f848a52dc7af7",
+    "hash": "0xdd7258e944fcd77cadb3ae2ab53c1de9aea8918238a4c91e4510581b2f878877",
     "status": "ACCEPTED",
     "result": "MAJORITY_AGREE",
     "rounds": "1",
-    "ms": 23087,
+    "ms": 49030,
     "leaderVote": null,
     "validatorVotes": [
       "agree",
-      "agree",
       "idle",
-      "idle"
+      "agree",
+      "agree"
     ],
     "n": 4,
-    "ambiguity": 85
+    "ambiguity": 66
   },
   {
-    "inquiry": "halden-mvf4dd20",
+    "inquiry": "halden-mvfuuv3l",
     "label": "round2",
-    "hash": "0x40514c1df51a68d011954d51ec5c691a91927c7520b1ec27e65a492e93d5dfed",
+    "hash": "0x93b72d1f9f58d85b20e61066952273ef1f65b442d8655acc5ca3647ed2c00029",
     "status": "ACCEPTED",
     "result": "MAJORITY_AGREE",
     "rounds": "1",
-    "ms": 34939,
+    "ms": 75595,
     "leaderVote": null,
     "validatorVotes": [
-      "idle",
+      "agree",
       "agree",
       "agree",
       "idle"
     ],
     "n": 4,
-    "ambiguity": 79
+    "ambiguity": 71
   }
 ]

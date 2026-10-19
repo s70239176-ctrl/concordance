@@ -13,3 +13,4 @@ scripts/sample-consensus.json
 scripts/records*.json
 scripts/_cases.json
 tests/_cases.json
+_newlogic.json

@@ -1,0 +1,161 @@
+{
+  "inquiry": "clause-mvfuj53k",
+  "address": "0x1e7d9A797860faCF5e993AFF715DD2C5d4B1f237",
+  "raw": {
+    "ambiguity": 100
+  },
+  "effective": {
+    "ambiguity": 20,
+    "ruled": 4
+  },
+  "fragility": {
+    "base_ambiguity": 100,
+    "parties": [
+      {
+        "party": 0,
+        "ambiguity": 100,
+        "delta": 0,
+        "flips": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      {
+        "party": 1,
+        "ambiguity": 100,
+        "delta": 0,
+        "flips": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ]
+      }
+    ],
+    "fragile_props": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "fragility": 100,
+    "pivotal": 0
+  },
+  "results": [
+    {
+      "prop": 0,
+      "expect": "DOES_NOT_HOLD",
+      "verdict": "DOES_NOT_HOLD",
+      "reason": "‘Port closure’ means a formal order ... a vessel waiting in an anchorage queue without such an order is not subject to a port closure",
+      "status": "ACCEPTED",
+      "result": "MAJORITY_AGREE",
+      "exec": "SUCCESS",
+      "rounds": 1,
+      "secs": 22,
+      "hist": [
+        {
+          "model": "gpt-oss",
+          "votes": [
+            "agree",
+            "agree",
+            "idle",
+            "agree"
+          ]
+        }
+      ]
+    },
+    {
+      "prop": 1,
+      "expect": "HOLDS",
+      "verdict": "HOLDS",
+      "reason": "'Port closure' means a formal order of the harbour master or port authority",
+      "status": "ACCEPTED",
+      "result": "MAJORITY_AGREE",
+      "exec": "SUCCESS",
+      "rounds": 1,
+      "secs": 18,
+      "hist": [
+        {
+          "model": "gpt-oss",
+          "votes": [
+            "agree",
+            "idle",
+            "idle",
+            "agree"
+          ]
+        }
+      ]
+    },
+    {
+      "prop": 2,
+      "expect": "HOLDS",
+      "verdict": "HOLDS",
+      "reason": "Clause 14.2 explicitly lists 'a labour strike affecting the port' as one of the enumerated force majeure events.",
+      "status": "ACCEPTED",
+      "result": "MAJORITY_AGREE",
+      "exec": "SUCCESS",
+      "rounds": 1,
+      "secs": 29,
+      "hist": [
+        {
+          "model": "minimax",
+          "votes": [
+            "agree",
+            "idle",
+            "agree",
+            "agree"
+          ]
+        }
+      ]
+    },
+    {
+      "prop": 3,
+      "expect": "DOES_NOT_HOLD",
+      "verdict": "DOES_NOT_HOLD",
+      "reason": "Clause 3 explicitly states that delay is measured 'from the end of the contractual departure window to the actual departure' and that 'no estimated time of arrival is used to measure delay,' directly contradicting the proposition.",
+      "status": "ACCEPTED",
+      "result": "MAJORITY_AGREE",
+      "exec": "SUCCESS",
+      "rounds": 1,
+      "secs": 25,
+      "hist": [
+        {
+          "model": "anthropic/claude-sonnet-4.6",
+          "votes": [
+            "idle",
+            "agree",
+            "agree",
+            "idle"
+          ]
+        }
+      ]
+    },
+    {
+      "prop": 4,
+      "expect": "UNDETERMINED",
+      "verdict": "UNDETERMINED",
+      "reason": "Clause 9 makes the carrier liable for spoilage 'caused by a failure of the reefer unit' but not liable 'where reefer telemetry shows supply air within the contract band throughout the voyage,' and the proposition depends on which factual co",
+      "status": "ACCEPTED",
+      "result": "MAJORITY_AGREE",
+      "exec": "SUCCESS",
+      "rounds": 1,
+      "secs": 18,
+      "hist": [
+        {
+          "model": "openai/gpt-5.4",
+          "votes": [
+            "idle",
+            "agree",
+            "idle",
+            "agree"
+          ]
+        }
+      ]
+    }
+  ]
+}

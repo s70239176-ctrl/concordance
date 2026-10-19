@@ -27,7 +27,7 @@
     <p class="kicker">An oracle for situations people see differently</p>
     <h1>Every oracle collapses disagreement into one answer. <em>Concordance keeps it.</em></h1>
     <p>Several parties see the same situation differently. Independent validators on different models read all of it, and the network agrees on a record of <b>what is settled, what is contested, how contested, and why</b>. Contracts then act on that record, with money moving in proportion to how settled the facts really are.</p>
-    <div class="tourcta"><button class="primary" id="tourBtn">&#9654; Watch the 60-second tour</button><span>Scripted story, then real GenLayer Studio validators. Esc stops it.</span></div>
+    <div class="tourcta"><button class="primary" id="tourBtn">&#9654; Watch the 75-second tour</button><span>Scripted story, then real GenLayer Studio validators. Esc stops it.</span></div>
   </section>
 
   <div class="q"><div><small>The inquiry</small><div id="question"></div></div></div>
@@ -80,14 +80,20 @@
         <div class="traj"><div class="small" id="trajLbl">Ambiguity trajectory</div><svg id="traj" viewBox="0 0 300 70" preserveAspectRatio="none"></svg></div>
       </section>
 
+      <section class="card" id="fragCard">
+        <h2><span class="no">05</span>Fragility: who holds the verdict up</h2>
+        <p class="sub">Each party is removed in turn and the record re-derived. If one voice can flip the result, you should know before money moves.</p>
+        <div id="frag"><div class="empty">Convene the validators to test fragility.</div></div>
+      </section>
+
       <section class="card">
-        <h2><span class="no">05</span>Triage: what to do about each dispute</h2>
+        <h2><span class="no">06</span>Triage: what to do about each dispute</h2>
         <p class="sub">The record also says <i>why</i> parties differ, which tells you whether more evidence can fix it.</p>
         <div class="tri" id="tri"><div class="empty">Convene the validators to see the triage.</div></div>
       </section>
 
       <section class="card esc">
-        <h2><span class="no">06</span>Downstream: ambiguity-priced escrow</h2>
+        <h2><span class="no">07</span>Downstream: ambiguity-priced escrow</h2>
         <p class="sub" id="escNote"></p>
         <div class="big"><b id="escPaid">0</b><span class="small" id="escOf"></span></div>
         <div class="bar" id="escBar"><i class="paid" style="width:0"></i><i class="avail" style="width:0"></i><i class="res" style="width:100%"></i></div>
@@ -96,23 +102,29 @@
         <div class="ctrl" style="margin:8px 0 0"><button id="exec" disabled>Execute release</button></div>
         <div class="log" id="log"></div>
       </section>
+
+      <section class="card" id="gateCard">
+        <h2><span class="no">08</span>Two contracts, one oracle</h2>
+        <p class="sub">A separate contract, <code>ConcordanceGate</code>, reads this record across contracts and pays by it. The oracle is infrastructure, not a closed demo.</p>
+        <div id="gate"><div class="empty">Convene the validators to see the gate.</div></div>
+      </section>
     </div>
   </div>
 
   <section class="card sec">
-    <h2><span class="no">07</span>The accounts the validators read</h2>
+    <h2><span class="no">09</span>The accounts the validators read</h2>
     <p class="sub">All four parties are fictional. Account text and evidence are untrusted input; validators scan it before reading.</p>
     <div class="accts" id="accts"></div>
   </section>
 
   <section class="card sec">
-    <h2><span class="no">08</span>Same facts, two oracles</h2>
+    <h2><span class="no">10</span>Same facts, two oracles</h2>
     <p class="sub">What a conventional majority-vote oracle would hand your contract, versus the Concordance record.</p>
     <div class="vs" id="vs"><div class="empty">Convene the validators to compare.</div></div>
   </section>
 
   <section class="card sec">
-    <h2><span class="no">09</span>Why this only works on GenLayer</h2>
+    <h2><span class="no">11</span>Why this only works on GenLayer</h2>
     <div class="why">
       <div><h3>Consensus on meaning</h3><p>LLMs never return the same prose twice. Concordance makes them agree on a <b>small, snapped, structured object</b> through the equivalence principle: the ambiguity index within a tolerance, enough propositions in the same class, and no outright contradiction. That is a consensus rule over interpretation, not over bytes.</p></div>
       <div><h3>Model diversity is the signal</h3><p>Disagreement between parties is the product. Disagreement between <i>validators</i> is the risk, so the contract keeps the LLM on a short leash (stance and evidence strength only) and derives every number that moves money in plain code.</p></div>
@@ -131,6 +143,7 @@
 <script src="derive.js"></script>
 <script src="scenarios.js"></script>
 <script src="real.js"></script>
+<script src="rulings.js"></script>
 <script>
 (function(){
 "use strict";
@@ -146,7 +159,8 @@ var CAUSE = {FACTUAL:"different facts",DEFINITIONAL:"different meaning",TEMPORAL
 var RESOLVABLE = {FACTUAL:true,TEMPORAL:true,SCOPE:true,DEFINITIONAL:false,NONE:true};
 
 var mode = "scripted", R = window.REAL;
-var st = {round:0, poisoned:false, busy:false, rec:null, history:[], paid:0, sel:null, vals:[], log:[]};
+var st = {round:0, poisoned:false, busy:false, rec:null, baseRec:null, rulings:{}, history:[], paid:0, sel:null, vals:[], log:[]};
+var RL = window.RULING || null, GT = window.GATE || null;
 
 /* ---------- derivation helpers (all numbers come from derive.js) ---------- */
 function flaggedFor(r){ return st.poisoned && S.rounds[r].parties.indexOf(S.poison.party) >= 0 ? [S.poison.party] : []; }
@@ -170,12 +184,18 @@ function validatorsFor(r){
   }
   return out;
 }
+function verdicts(){ var v = {}; Object.keys(st.rulings).forEach(function(k){ v[k] = st.rulings[k].verdict; }); return v; }
+function setRec(raw){ st.baseRec = raw; st.rec = C.applyRulings(raw, verdicts()); }
+var VTEXT = {HOLDS:"HOLDS", DOES_NOT_HOLD:"DOES NOT HOLD", UNDETERMINED:"UNDETERMINED"};
 function statusColor(p){
+  if (p.status.indexOf("RULED") === 0) return "#ece6d8";
   if (p.status === "UNSUPPORTED") return "#77736a";
   if (p.status.indexOf("AGREED") === 0) return "#8fd19e";
   return p.divergence >= 80 ? "#ff5d4d" : (p.divergence >= 55 ? "#f08a3c" : "#e0b040");
 }
 function statusText(p){
+  if (p.status === "RULED_TRUE") return "RULED · HOLDS";
+  if (p.status === "RULED_FALSE") return "RULED · DOES NOT HOLD";
   if (p.status === "AGREED_TRUE") return "AGREED · TRUE";
   if (p.status === "AGREED_FALSE") return "AGREED · FALSE";
   if (p.status === "UNSUPPORTED") return "UNSUPPORTED";
@@ -299,16 +319,74 @@ function drawTraj(){
 function drawTriage(){
   var rec = st.rec;
   if (!rec){ $("tri").innerHTML = '<div class="empty">Convene the validators to see the triage.</div>'; return; }
-  var list = rec.props.filter(function(p){return p.status !== "AGREED_TRUE" && p.status !== "AGREED_FALSE";})
+  var ruled = rec.props.filter(function(p){ return p.ruled; });
+  var list = rec.props.filter(function(p){ return !p.ruled && p.status.indexOf("AGREED") !== 0; })
     .sort(function(a,b){return b.weight*b.divergence - a.weight*a.divergence;});
-  if (!list.length){ $("tri").innerHTML = '<div class="empty">Nothing contested. The record is settled.</div>'; return; }
-  $("tri").innerHTML = list.map(function(p){
-    var fix = RESOLVABLE[p.cause];
+  if (!list.length && !ruled.length){ $("tri").innerHTML = '<div class="empty">Nothing contested. The record is settled.</div>'; return; }
+  var html = list.map(function(p){
+    var fix = RESOLVABLE[p.cause], canRule = RL && p.index === RL.prop && p.status === "CONTESTED";
     return '<div class="tr" data-q="'+p.index+'"><div class="t1"><span>'+esc(S.props[p.index].short)+'</span><span>'+p.divergence+'%</span></div>'
       +(p.crux?'<div class="crux">'+esc(p.crux)+'</div>':'')
       +(p.cause!=="NONE"?'<span class="tag">'+CAUSE[p.cause]+'</span>':'')
-      +(p.cause==="NONE"?'':'<span class="tag '+(fix?'fix':'rule')+'">'+(fix?'more evidence can settle this':'needs a ruling → appeal')+'</span>')+'</div>';
+      +(p.cause==="NONE"?'':'<span class="tag '+(fix?'fix':'rule')+'">'+(fix?'more evidence can settle this':'needs a ruling')+'</span>')
+      +(canRule?'<div style="margin-top:9px"><button class="rl" data-q="'+p.index+'">&#9878; Request ruling</button></div>':'')+'</div>';
   }).join("");
+  html += ruled.map(function(p){
+    var r = st.rulings[p.index] || {};
+    return '<div class="tr ruled" data-q="'+p.index+'" style="border-left:3px solid #ece6d8;padding-left:12px"><div class="t1"><span>&#9878; '+esc(S.props[p.index].short)+'</span><span style="color:#ece6d8">RULED</span></div>'
+      +'<div class="crux">'+esc(r.reason || "")+'</div><span class="tag fix">'+VTEXT[r.verdict]+'</span><span class="tag">validator consensus on the clause text'+(r.tx?' &middot; tx '+esc(String(r.tx).slice(0,10))+'&hellip;':'')+'</span></div>';
+  }).join("");
+  $("tri").innerHTML = html;
+}
+function drawFrag(){
+  var box = $("frag");
+  if (!st.baseRec){ box.innerHTML = '<div class="empty">Convene the validators to test fragility.</div>'; return; }
+  var f = C.fragility(st.baseRec), n = st.baseRec.props.length, maxd = 1;
+  f.parties.forEach(function(e){ maxd = Math.max(maxd, Math.abs(e.delta)); });
+  var head;
+  if (f.pivotal === null) head = '<b>Robust.</b> No single party&rsquo;s removal changes any proposition.';
+  else {
+    var e0 = f.parties[f.pivotal];
+    head = '<b>'+esc(S.parties[f.pivotal].name)+' is pivotal.</b> Remove them and '+e0.flips.length+' of '+n+' proposition'+(e0.flips.length===1?'':'s')+' change class or lean'+(e0.ambiguity!==f.base_ambiguity?'; the ambiguity index goes '+f.base_ambiguity+' &rarr; '+e0.ambiguity:'')+'.';
+  }
+  box.innerHTML = '<div class="banner '+(f.pivotal===null?'good':'warn')+'" style="margin:0 0 12px">'+head+'</div>'
+    + f.parties.map(function(e){
+      var pt = S.parties[e.party], w = Math.round(Math.abs(e.delta)/maxd*100), neg = e.delta < 0;
+      return '<div style="display:grid;grid-template-columns:118px 1fr;gap:12px;align-items:center;padding:7px 0;border-top:1px solid var(--rule)">'
+        +'<span style="font:500 14px var(--serif)">'+esc(pt.name.split(" ")[0])+(e.party===f.pivotal?' <span class="tag rule" style="margin:0 0 0 4px">pivotal</span>':'')+'</span>'
+        +'<div><div style="display:flex;align-items:center;gap:10px"><div class="bar" style="flex:1;height:7px;background:var(--ink2);border:1px solid var(--rule)"><i style="display:block;height:100%;width:'+Math.max(2,w)+'%;background:'+(neg?'#8fd19e':'#e0b040')+'"></i></div>'
+        +'<b style="font:500 12px var(--mono);min-width:48px;text-align:right">'+(e.delta>0?'+':'')+e.delta+'</b></div>'
+        +'<div class="small" style="margin-top:3px">'+(e.flips.length?'flips: '+e.flips.map(function(i){return esc(S.props[i].short);}).join(', '):'changes no proposition')+'</div></div></div>';
+    }).join("")
+    + '<div class="small" style="margin-top:8px">Bars show how far the ambiguity index moves when that party is removed (&minus; means the dispute shrinks without them).</div>';
+}
+function drawGate(){
+  var box = $("gate");
+  if (!st.rec){ box.innerHTML = '<div class="empty">Convene the validators to see the gate.</div>'; return; }
+  var idx = RL ? RL.prop : 6;
+  var before = C.releaseFraction(st.baseRec.props, [idx], ["FALSE"], 0), now = C.releaseFraction(st.rec.props, [idx], ["FALSE"], 0);
+  var ruledNow = !!(st.rec.props[idx] && st.rec.props[idx].ruled);
+  box.innerHTML = '<div style="font:500 16px var(--serif);margin-bottom:6px">Policy P1 pays the shipper if the hold is <i>not</i> a &lsquo;port closure&rsquo;</div>'
+    + '<div class="req" style="grid-template-columns:1fr 120px 52px"><span class="small">release justified by the oracle now</span><div class="meter"><i style="width:'+now+'%;background:'+(now>=80?'#8fd19e':(now>0?'#e0b040':'#77736a'))+'"></i></div><span class="st">'+now+'%</span></div>'
+    + '<div class="small" style="margin-top:8px">'+(ruledNow ? 'The ruling settled the proposition, so the gate reads clarity 100 and the policy is '+(now===100?'fully payable':'not payable')+'. Before the ruling it justified '+before+'%.' : 'The proposition is contested, so the gate pays '+before+'% until a ruling or more evidence settles it.')+'</div>'
+    + (GT ? '<div class="banner good" style="margin-top:12px">Recorded on Studio: <code>ConcordanceGate</code> <code>'+esc(GT.address.slice(0,8))+'&hellip;'+esc(GT.address.slice(-4))+'</code> read the signal from <code>Concordance</code> across contracts and released <b>'+GT.pct+'%</b> ('+esc(GT.note)+'; tx <code>'+esc(String(GT.tx).slice(0,10))+'&hellip;</code>).</div>' : '');
+}
+function huntNeedle(){ // the needle hunts while validators work; returns a stop function
+  if (reduce) return function(){};
+  var mk = $("mark"), ab = $("amb"); mk.classList.add("hunt"); ab.classList.add("hunting"); mk.style.opacity = "1";
+  var h = setInterval(function(){ var n = 14 + Math.round(Math.random()*78); mk.style.left = n + "%"; setNum(ab, n); ab.dataset.v = n; }, 430);
+  return function(){ clearInterval(h); mk.classList.remove("hunt"); ab.classList.remove("hunting"); };
+}
+async function requestRuling(idx){
+  if (st.busy || !st.rec || st.rulings[idx] || !RL) return;
+  st.busy = true; var before = st.rec.ambiguity;
+  setBanner("<b>Ruling requested.</b> Validators answer one narrow question: does the proposition hold as a matter of what the clause says? Governing text: <i>"+esc(RL.clause_short)+"</i>");
+  var stop = huntNeedle(); await sleep(2800); stop();
+  st.rulings[idx] = {verdict:RL.verdict, reason:RL.reason, tx:RL.tx};
+  setRec(st.baseRec);
+  setBanner("<b>Ruling: "+VTEXT[RL.verdict]+".</b> "+esc(RL.reason)+" Ambiguity "+before+" &rarr; "+st.rec.ambiguity+". <span style='opacity:.8'>Verdict recorded from a real Studio ruling on the same clause text (tx "+esc(String(RL.tx).slice(0,10))+"&hellip;).</span>", "good");
+  drawMap(true); bindMap(); drawMetrics(); drawTriage(); drawVs(); drawEscrow(); drawGate(); drawFrag();
+  st.busy = false;
 }
 function naive(p){
   var a = 0, d = 0; p.cells.forEach(function(c){ if (c.stance==="AFFIRMS") a++; else if (c.stance==="DENIES") d++; });
@@ -345,7 +423,7 @@ function drawVs(){
    + rows.map(function(r){return '<div class="rw'+(r.lost?' lost':'')+'"><span>'+esc(S.props[r.p.index].short)+'</span><b style="color:'+(r.n==="TIE"?'#a8a395':'#ece6d8')+'">'+r.n+'</b></div>';}).join("")
    + '</div><div class="callout old"><b>'+hidden+' live disputes hidden</b> behind confident answers. The escrow can only pay <b>'+(allOk?'100%':'0%')+'</b>: all or nothing.</div></div>'
    +'<div class="col new"><h3>Concordance record</h3><div class="small">Settled facts, contested facts, how contested, and why.</div><div class="rows">'
-   + rows.map(function(r){var p=r.p;return '<div class="rw"><span>'+esc(S.props[p.index].short)+'</span><b style="color:'+statusColor(p)+'">'+(p.status.indexOf("AGREED")===0?'agreed':p.status==="UNSUPPORTED"?'unsupported':p.divergence+'% apart')+'</b></div>';}).join("")
+   + rows.map(function(r){var p=r.p;return '<div class="rw"><span>'+esc(S.props[p.index].short)+'</span><b style="color:'+statusColor(p)+'">'+(p.ruled?'ruled':p.status.indexOf("AGREED")===0?'agreed':p.status==="UNSUPPORTED"?'unsupported':p.divergence+'% apart')+'</b></div>';}).join("")
    + '</div><div class="callout new">The same record releases <b>'+pct+'%</b> now and the rest as the facts settle, with a map of which disputes more evidence can close.</div></div>';
 }
 function showDetail(qi){
@@ -407,7 +485,7 @@ async function convene(){
   var agree = st.vals.filter(function(v){return v.state === "ok";}).length;
   await sleep(450);
   if (hunt){ clearInterval(hunt); mk.classList.remove("hunt"); ab.classList.remove("hunting"); }
-  st.rec = st.vals[0].rec;
+  setRec(st.vals[0].rec);
   st.history.push(st.rec.ambiguity);
   var msg = agree === 5 ? "Consensus 5/5." : "Consensus "+agree+"/5. The dissent is recorded and outvoted.";
   if (mode === "real"){
@@ -415,7 +493,7 @@ async function convene(){
     setBanner("<b>On-chain: "+esc(rr.status)+" · "+esc(rr.result)+" in "+rr.rounds+" consensus round.</b> "+ag+" validators agreed, "+idl+" did not vote (idle), "+dis+" disagreed. Leader model: "+esc(rr.leaderModel)+". Ambiguity index "+st.rec.ambiguity+" (the scripted story said "+(r===0?68:38)+"). tx "+esc(rr.hash.slice(0,10))+"…", dis ? "warn" : "good");
   } else if (agree >= 4) setBanner("<b>"+msg+"</b> The network agrees on the world model: "+st.rec.agreed+" agreed, "+st.rec.contested+" contested, ambiguity index "+st.rec.ambiguity+".", "good");
   else setBanner("<b>"+msg+"</b> Not enough agreement: the transaction would go to appeal with a larger validator set.", "bad");
-  drawMap(true); bindMap(); drawMetrics(); drawTraj(); drawTriage(); drawVs(); drawEscrow(); drawAccounts(); drawSpread();
+  drawMap(true); bindMap(); drawMetrics(); drawTraj(); drawTriage(); drawVs(); drawEscrow(); drawAccounts(); drawSpread(); drawFrag(); drawGate();
   st.busy = false; $("go").disabled = false; updateGo(); drawEscrow();
 }
 function updateGo(){
@@ -432,8 +510,8 @@ async function execute(){
   drawEscrow();
 }
 function reset(){
-  st = {round:0, poisoned:$("poison").checked, busy:false, rec:null, history:[], paid:0, sel:null, vals:[], log:[]};
-  $("go").disabled = false; updateGo(); drawAccounts(); drawMap(false); bindMap(); drawMetrics(); drawTraj(); drawTriage(); drawVs(); drawEscrow(); drawVals(false,false);
+  st = {round:0, poisoned:$("poison").checked, busy:false, rec:null, baseRec:null, rulings:{}, history:[], paid:0, sel:null, vals:[], log:[]};
+  $("go").disabled = false; updateGo(); drawAccounts(); drawMap(false); bindMap(); drawMetrics(); drawTraj(); drawTriage(); drawVs(); drawEscrow(); drawVals(false,false); drawFrag(); drawGate();
   $("vals").innerHTML = ""; setBanner("Waiting for the first convening."); drawSpread();
 }
 function onPoison(){
@@ -441,8 +519,8 @@ function onPoison(){
   var on = $("poison").checked; st.poisoned = on; $("poisonLbl").classList.toggle("on", on);
   drawAccounts();
   if (st.round && !st.busy){
-    st.vals = validatorsFor(st.round-1); st.rec = st.vals[0].rec; st.history[st.history.length-1] = st.rec.ambiguity;
-    drawVals(true, true); drawMap(true); bindMap(); drawMetrics(); drawTraj(); drawTriage(); drawVs(); drawEscrow();
+    st.vals = validatorsFor(st.round-1); setRec(st.vals[0].rec); st.history[st.history.length-1] = st.rec.ambiguity;
+    drawVals(true, true); drawMap(true); bindMap(); drawMetrics(); drawTraj(); drawTriage(); drawVs(); drawEscrow(); drawFrag(); drawGate();
     setBanner(on ? "<b>Greybox scan flagged Halden's evidence.</b> Instruction-like text was found; Halden's evidence weight is capped at 25 before anything is derived. The attack lost Halden influence instead of gaining it. (Ambiguity moved because a voice was muted, not because anything was resolved.)" : "Attack removed. Record re-derived.", on ? "bad" : "good");
   } else if (on) setBanner("Attack armed. Convene to watch the greybox scan neutralize it.", "warn");
 }
@@ -479,15 +557,16 @@ $("go").addEventListener("click", convene);
 $("exec").addEventListener("click", execute);
 $("reset").addEventListener("click", reset);
 $("poison").addEventListener("change", onPoison);
-$("tri").addEventListener("click", function(e){ var t = e.target.closest(".tr"); if (t && st.rec){ select(+t.dataset.q); document.getElementById("map").scrollIntoView({block:"center",behavior:reduce?"auto":"smooth"}); }});
-/* ---------- the 60-second tour: drives the same functions a person would click ---------- */
+$("tri").addEventListener("click", function(e){ var rb = e.target.closest(".rl"); if (rb){ requestRuling(+rb.dataset.q); return; } var t = e.target.closest(".tr"); if (t && st.rec){ select(+t.dataset.q); document.getElementById("map").scrollIntoView({block:"center",behavior:reduce?"auto":"smooth"}); }});
+/* ---------- the guided tour: drives the same functions a person would click ---------- */
 var tour = {on:false, stop:false, paused:false, t0:0};
-var TOUR_N = 9;
-function tw(ms){ // wait that honours Pause and Stop
+var TOUR_N = 11;
+function tw(ms){ // wait that honours Pause and Stop, and counts REAL elapsed time (background tabs throttle timers to ~1/s)
   return new Promise(function(resolve, reject){
-    var t = 0, h = setInterval(function(){
+    var t = 0, last = performance.now(), h = setInterval(function(){
+      var now = performance.now(), dt = now - last; last = now;
       if (tour.stop){ clearInterval(h); reject("stop"); return; }
-      if (!tour.paused) t += 100;
+      if (!tour.paused) t += dt;
       if (t >= ms){ clearInterval(h); resolve(); }
     }, 100);
   });
@@ -516,19 +595,26 @@ async function runTour(){
     tcap(1, "<b>Scripted story.</b> Four parties tell different stories about a late, possibly warm container. A normal oracle returns one answer. Watch what Concordance keeps."); await tw(4000);
     tcap(2, "<b>Round 1.</b> Five validators on five different models read every account independently, then the network checks they agree."); look("map", 90);
     await convene();
-    tcap(3, "<b>The agreement map.</b> "+st.rec.agreed+" facts settled, "+st.rec.contested+" contested, ambiguity index <b>"+st.rec.ambiguity+"</b>. Ribbons show who asserts what and how well it is evidenced. Cold chain is the live fight."); select(3); await tw(4500); select(3);
-    tcap(4, "<b>Triage.</b> It also says <i>why</i> parties differ. Disputes over facts can be settled with more evidence; disputes over meaning need a ruling."); look("tri"); await tw(4000);
+    tcap(3, "<b>The agreement map.</b> "+st.rec.agreed+" facts settled, "+st.rec.contested+" contested, ambiguity index <b>"+st.rec.ambiguity+"</b>. Ribbons show who asserts what and how well it is evidenced. Cold chain is the live fight."); select(3); await tw(4000); select(3);
+    tcap(4, "<b>Triage.</b> It also says <i>why</i> parties differ. Disputes over facts can be settled with more evidence; disputes over meaning need a ruling."); look("tri"); await tw(3500);
     tcap(5, "<b>Priced ambiguity.</b> The escrow releases in proportion to how settled the facts are: <b>"+releasePct()+"%</b> now, never all-or-nothing."); look("exec"); await tw(1200); await execute(); await tw(3200);
     tcap(6, "<b>Round 2.</b> The surveyor and the harbour log join. Reconvene."); look("map", 90);
     await convene();
     tcap(6, "Ambiguity falls to <b>"+st.rec.ambiguity+"</b>; the model now justifies <b>"+releasePct()+"%</b>. Escrow releases the increment and never claws back."); look("exec"); await tw(1200); await execute(); await tw(3800);
-    tcap(7, "<b>Greybox.</b> Halden's evidence now contains an injected instruction. The scan flags it and caps that party's weight, so the attacker loses influence."); look("map", 90);
-    $("poison").checked = true; onPoison(); await tw(4200); $("poison").checked = false; onPoison();
-    tcap(8, "<b>Now the real thing.</b> Recorded transactions from GenLayer Studio: real models, real votes, messier numbers."); setMode("real"); look("mReal", 80); await tw(2200);
+    var fr = C.fragility(st.baseRec), pv = fr.pivotal === null ? null : S.parties[fr.pivotal].name;
+    tcap(7, pv ? "<b>Fragility.</b> Remove each party in turn: <b>"+esc(pv)+"</b> alone holds "+fr.parties[fr.pivotal].flips.length+" propositions up. If one voice can flip the verdict, you know before money moves." : "<b>Fragility.</b> No single party can flip any proposition: the record is robust."); look("fragCard", 80); await tw(4500);
+    if (RL){
+      tcap(8, "<b>Where evidence cannot settle it.</b> &lsquo;Is an anchorage hold a port closure?&rsquo; is a question about meaning. Validators answer that one narrow question from the clause text."); look("tri"); await tw(2200);
+      var rid = st.rec.props[RL.prop] && st.rec.props[RL.prop].status === "CONTESTED" ? RL.prop : -1;
+      if (rid >= 0){ await requestRuling(rid); tcap(8, "<b>"+esc(VTEXT[RL.verdict])+".</b> The dispute is settled by interpretation, ambiguity falls to <b>"+st.rec.ambiguity+"</b>, and a second contract reading the oracle now sees a settled signal."); look("gateCard", 60); await tw(5200); }
+    }
+    tcap(9, "<b>Greybox.</b> Halden's evidence now contains an injected instruction. The scan flags it and caps that party's weight, so the attacker loses influence."); look("map", 90);
+    $("poison").checked = true; onPoison(); await tw(3600); $("poison").checked = false; onPoison();
+    tcap(10, "<b>Now the real thing.</b> Recorded transactions from GenLayer Studio: real models, real votes, messier numbers."); setMode("real"); look("mReal", 80); await tw(2200);
     await convene(); await convene();
     var sp = spreadStats(1);
-    tcap(8, "Same inputs, four different models. Cell by cell they disagree: the original per-proposition rule would have accepted <b>"+sp.oldOk+" of "+sp.n+"</b> pairs. They agree far better on the overall index, so consensus now ratifies <b>that</b>."); look("spreadCard", 20); await tw(6500);
-    tcap(9, "<b>Honest status.</b> On Studio, 6 of 6 convenes reached majority agreement and the escrow paid exactly what this page predicts. Not yet run on Bradbury; real ambiguity was noisier than the script."); look("map", 90); await tw(5000);
+    tcap(10, "Same inputs, four different models. Cell by cell they disagree: the original per-proposition rule would have accepted <b>"+sp.oldOk+" of "+sp.n+"</b> pairs. They agree far better on the overall index, so consensus now ratifies <b>that</b>."); look("spreadCard", 20); await tw(5500);
+    tcap(11, "<b>Honest status.</b> On Studio, 6 of 6 convenes reached majority agreement and the escrow paid exactly what this page predicts. Not yet run on Bradbury; real ambiguity was noisier than the script."); look("map", 90); await tw(4500);
     done = true;
   } catch (e) { if (e !== "stop") throw e; }
   var secs = Math.round((Date.now() - tour.t0) / 1000);

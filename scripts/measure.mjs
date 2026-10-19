@@ -8,7 +8,7 @@ import { accounts, client, loadState, send, read, ROOT } from './common.mjs'
 
 const S = createRequire(import.meta.url)(join(ROOT, 'web', 'scenarios.js'))
 const N = parseInt(process.argv[2] || '1', 10)
-const { address } = loadState()
+const address = process.env.CONTRACT || loadState().address
 const accs = accounts(5) // [0] opener, [1..4] = Kestrel, Halden, Meridian, Corvane
 const cl = accs.map(client)
 const OUT = join(ROOT, 'scripts', 'results.json')

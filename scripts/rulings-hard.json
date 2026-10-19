@@ -1,0 +1,179 @@
+{
+  "inquiry": "clause-hard-mvfuo83d",
+  "address": "0x1e7d9A797860faCF5e993AFF715DD2C5d4B1f237",
+  "raw": {
+    "ambiguity": 83
+  },
+  "effective": {
+    "ambiguity": 17,
+    "ruled": 4
+  },
+  "fragility": {
+    "base_ambiguity": 83,
+    "parties": [
+      {
+        "party": 0,
+        "ambiguity": 100,
+        "delta": 17,
+        "flips": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      },
+      {
+        "party": 1,
+        "ambiguity": 100,
+        "delta": 17,
+        "flips": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      }
+    ],
+    "fragile_props": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "fragility": 100,
+    "pivotal": 0
+  },
+  "results": [
+    {
+      "prop": 0,
+      "expect": [
+        "UNDETERMINED"
+      ],
+      "verdict": "UNDETERMINED",
+      "reason": "Clause 5 requires delivery 'within a reasonable time' but does not define what period is reasonable, so whether a 70-hour delay is unreasonable cannot be determined from the text alone.",
+      "status": "ACCEPTED",
+      "result": "MAJORITY_AGREE",
+      "exec": "SUCCESS",
+      "rounds": 1,
+      "secs": 16,
+      "hist": [
+        {
+          "model": "anthropic/claude-sonnet-4.6",
+          "votes": [
+            "idle",
+            "agree",
+            "agree",
+            "agree"
+          ]
+        }
+      ]
+    },
+    {
+      "prop": 1,
+      "expect": [
+        "HOLDS"
+      ],
+      "verdict": "HOLDS",
+      "reason": "Clause 7 expressly says, 'Performance of the voyage by the carrier's own affiliates is permitted,' which directly allows use of an affiliate company to perform the voyage.",
+      "status": "ACCEPTED",
+      "result": "MAJORITY_AGREE",
+      "exec": "SUCCESS",
+      "rounds": 1,
+      "secs": 17,
+      "hist": [
+        {
+          "model": "gpt-5-4",
+          "votes": [
+            "agree",
+            "idle",
+            "idle",
+            "agree"
+          ]
+        }
+      ]
+    },
+    {
+      "prop": 2,
+      "skipped": "AGREED_TRUE"
+    },
+    {
+      "prop": 3,
+      "expect": [
+        "HOLDS",
+        "UNDETERMINED"
+      ],
+      "verdict": "HOLDS",
+      "reason": "Clause 8 sets the contract temperature band at '2-4 C', so 4.6 C falls outside that band, meaning the carrier failed to keep the cargo within the required range and therefore not 'in good order'.",
+      "status": "ACCEPTED",
+      "result": "MAJORITY_AGREE",
+      "exec": "SUCCESS",
+      "rounds": 1,
+      "secs": 20,
+      "hist": [
+        {
+          "model": "sonnet",
+          "votes": [
+            "agree",
+            "idle",
+            "idle",
+            "agree"
+          ]
+        }
+      ]
+    },
+    {
+      "prop": 4,
+      "expect": [
+        "DOES_NOT_HOLD"
+      ],
+      "verdict": "DOES_NOT_HOLD",
+      "reason": "Clause 15 specifies that the shipper may terminate if delay exceeds seventy-two (72) hours.",
+      "status": "ACCEPTED",
+      "result": "MAJORITY_AGREE",
+      "exec": "SUCCESS",
+      "rounds": 1,
+      "secs": 26,
+      "hist": [
+        {
+          "model": "gemma",
+          "votes": [
+            "agree",
+            "agree",
+            "idle",
+            "idle"
+          ]
+        }
+      ]
+    },
+    {
+      "prop": 5,
+      "expect": [
+        "HOLDS"
+      ],
+      "verdict": "HOLDS",
+      "reason": "Clause 11 states the carrier is 'not liable for loss or damage caused by ... insufficient packing by the shipper,' which excludes liability for loss caused by the shipper's own packaging; whether loss was so caused is a separate factual que",
+      "status": "ACCEPTED",
+      "result": "MAJORITY_AGREE",
+      "exec": "SUCCESS",
+      "rounds": 1,
+      "secs": 16,
+      "hist": [
+        {
+          "model": "kimi",
+          "votes": [
+            "idle",
+            "agree",
+            "agree",
+            "idle"
+          ]
+        }
+      ]
+    }
+  ]
+}

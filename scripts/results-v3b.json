@@ -1,0 +1,38 @@
+[
+  {
+    "inquiry": "halden-mvf4dd20",
+    "label": "round1",
+    "hash": "0x4157a2e1892372f2e8911444826a3f4270ef9e05b6b9bb587a6f848a52dc7af7",
+    "status": "ACCEPTED",
+    "result": "MAJORITY_AGREE",
+    "rounds": "1",
+    "ms": 23087,
+    "leaderVote": null,
+    "validatorVotes": [
+      "agree",
+      "agree",
+      "idle",
+      "idle"
+    ],
+    "n": 4,
+    "ambiguity": 85
+  },
+  {
+    "inquiry": "halden-mvf4dd20",
+    "label": "round2",
+    "hash": "0x40514c1df51a68d011954d51ec5c691a91927c7520b1ec27e65a492e93d5dfed",
+    "status": "ACCEPTED",
+    "result": "MAJORITY_AGREE",
+    "rounds": "1",
+    "ms": 34939,
+    "leaderVote": null,
+    "validatorVotes": [
+      "idle",
+      "agree",
+      "agree",
+      "idle"
+    ],
+    "n": 4,
+    "ambiguity": 79
+  }
+]

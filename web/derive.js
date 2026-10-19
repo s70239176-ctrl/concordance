@@ -84,6 +84,55 @@
     return fl((got + fl(total / 2)) / total);
   }
 
-  var api = { deriveRecord: deriveRecord, recordsEquivalent: recordsEquivalent, releaseFraction: releaseFraction };
+  /* Leave-one-out robustness from a stored record alone: remove each party, re-derive, see what flips. */
+  function fragility(record) {
+    var props = record.props;
+    if (!props.length) return { base_ambiguity: 0, parties: [], fragile_props: [], fragility: 0, pivotal: null };
+    var weights = props.map(function (p) { return p.weight; }), nParties = props[0].cells.length;
+    function rowsWithout(skip) {
+      return { rows: props.map(function (p) {
+        return { cells: p.cells.map(function (c, k) { return k === skip ? { stance: "SILENT", strength: 0 } : { stance: c.stance, strength: c.strength }; }), cause: "NONE", crux: "", decisive: [] };
+      }) };
+    }
+    var base = deriveRecord(weights, rowsWithout(-1), []), per = [], fragile = {};
+    for (var j = 0; j < nParties; j++) {
+      var alt = deriveRecord(weights, rowsWithout(j), []), flips = [];
+      for (var i = 0; i < props.length; i++) {
+        if (klass(base.props[i]) !== klass(alt.props[i]) || base.props[i].lean !== alt.props[i].lean) { flips.push(i); fragile[i] = true; }
+      }
+      per.push({ party: j, ambiguity: alt.ambiguity, delta: alt.ambiguity - base.ambiguity, flips: flips });
+    }
+    var pivotal = null, bestF = 0, bestD = 0;
+    per.forEach(function (e) {
+      var f = e.flips.length, d = Math.abs(e.delta);
+      if (f && (f > bestF || (f === bestF && d > bestD))) { bestF = f; bestD = d; pivotal = e.party; }
+    });
+    var fp = Object.keys(fragile).map(Number).sort(function (x, y) { return x - y; });
+    return { base_ambiguity: base.ambiguity, parties: per, fragile_props: fp, fragility: fl((100 * fp.length) / props.length), pivotal: pivotal };
+  }
+
+  /* Effective record: a proposition with a final ruling is settled by it. verdicts: { index: "HOLDS"|"DOES_NOT_HOLD"|"UNDETERMINED" } */
+  function applyRulings(record, verdicts) {
+    var props = record.props.map(function (p) {
+      var v = verdicts[p.index];
+      if (v !== "HOLDS" && v !== "DOES_NOT_HOLD") return p;
+      var q = {}; Object.keys(p).forEach(function (k) { q[k] = p[k]; });
+      q.ruled = true; q.status_before = p.status; q.divergence_before = p.divergence;
+      q.status = v === "HOLDS" ? "RULED_TRUE" : "RULED_FALSE"; q.lean = v === "HOLDS" ? "TRUE" : "FALSE"; q.divergence = 0; q.clarity = 100;
+      return q;
+    });
+    var wsum = props.reduce(function (x, p) { return x + p.weight; }, 0) || 1, acc = 0;
+    props.forEach(function (p) { acc += p.weight * (p.status === "UNSUPPORTED" ? 100 : p.divergence); });
+    var amb = fl((acc + fl(wsum / 2)) / wsum), out = {};
+    Object.keys(record).forEach(function (k) { out[k] = record[k]; });
+    out.props = props; out.ambiguity = amb; out.concordance = 100 - amb;
+    out.agreed = props.filter(function (p) { return p.status.indexOf("AGREED") === 0 || p.status.indexOf("RULED") === 0; }).length;
+    out.contested = props.filter(function (p) { return p.status === "CONTESTED"; }).length;
+    out.unsupported = props.filter(function (p) { return p.status === "UNSUPPORTED"; }).length;
+    out.ruled = props.filter(function (p) { return p.ruled; }).length;
+    return out;
+  }
+
+  var api = { deriveRecord: deriveRecord, recordsEquivalent: recordsEquivalent, releaseFraction: releaseFraction, fragility: fragility, applyRulings: applyRulings };
   if (typeof module !== "undefined" && module.exports) module.exports = api; else root.Concordance = api;
 })(typeof window !== "undefined" ? window : globalThis);

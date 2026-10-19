@@ -1,0 +1,18 @@
+gate 0x620ec49c91469A2fa7Fa0d08bD009d99CCBd6287 reads concordance 0x1e7d9A797860faCF5e993AFF715DD2C5d4B1f237
+rulings on chain: 0:UNDETERMINED 1:HOLDS 3:HOLDS 4:DOES_NOT_HOLD 5:HOLDS | effective statuses: 0:CONTESTED 1:RULED_TRUE 2:AGREED_TRUE 3:RULED_TRUE 4:RULED_FALSE 5:RULED_TRUE
+open_policy (needs a cross-contract read of get_status): ACCEPTED/MAJORITY_AGREE exec=SUCCESS
+policy stored: {"escrow":1000000,"paid":0,"status":"OPEN"}
+claim by a stranger (cross-contract get_signal): ACCEPTED/MAJORITY_AGREE exec=SUCCESS
+paid: 1000000 history: [{"release_pct":100,"paid_now":1000000,"ruled":[4],"at":1792451183}]
+second claim (must be refused): ACCEPTED/MAJORITY_AGREE exec=ERROR
+claim on an UNRULED deadlocked proposition (must be refused): ACCEPTED/MAJORITY_AGREE exec=ERROR
+beneficiary gained 1000000 | expected 1000000
+close_inquiry clause-hard-mvfuo83d ACCEPTED SUCCESS
+gate 0x620ec49c91469A2fa7Fa0d08bD009d99CCBd6287 reads concordance 0x1e7d9A797860faCF5e993AFF715DD2C5d4B1f237
+rulings on chain: 0:UNDETERMINED 1:HOLDS 3:HOLDS 4:DOES_NOT_HOLD 5:HOLDS | effective statuses: 0:CONTESTED 1:RULED_TRUE 2:AGREED_TRUE 3:RULED_TRUE 4:RULED_FALSE 5:RULED_TRUE
+refund by a non-funder (must be refused): pol-mvfv5w30b ACCEPTED/MAJORITY_AGREE exec=ERROR
+refund by funder: pol-mvfv5w30b ACCEPTED/MAJORITY_AGREE exec=SUCCESS
+funder balance change 0 | policy now CLOSED
+refund by a non-funder (must be refused): pol-mvfv5c4w ACCEPTED/MAJORITY_AGREE exec=ERROR
+refund by funder: pol-mvfv5c4w ACCEPTED/MAJORITY_AGREE exec=SUCCESS
+funder balance change 1000000 | policy now CLOSED

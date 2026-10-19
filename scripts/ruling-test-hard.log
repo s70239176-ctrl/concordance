@@ -1,0 +1,11 @@
+inquiry clause-hard-mvfuo83d
+convene ACCEPTED MAJORITY_AGREE rounds 1
+record statuses: 1:C100 2:C100 3:A0 4:C100 5:C100 6:C100 ambiguity 83
+fragility: {"fragility":100,"pivotal":0,"fragile":[0,1,2,3,4,5]}
+prop 1: expect UNDETERMINED          got UNDETERMINED  OK  ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1 16s | Clause 5 requires delivery 'within a reasonable time' but does not define what period is reasonable, so whether a 70-hour delay is unreasonable cannot be determined from the text alone.
+prop 2: expect HOLDS                 got HOLDS         OK  ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1 17s | Clause 7 expressly says, 'Performance of the voyage by the carrier's own affiliates is permitted,' which directly allows use of an affiliate company to perform the voyage.
+prop 3: AGREED_TRUE (not contested, no ruling requested)
+prop 4: expect HOLDS|UNDETERMINED    got HOLDS         OK  ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1 20s | Clause 8 sets the contract temperature band at '2-4 C', so 4.6 C falls outside that band, meaning the carrier failed to keep the cargo within the required range and therefore not 'in good order'.
+prop 5: expect DOES_NOT_HOLD         got DOES_NOT_HOLD OK  ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1 26s | Clause 15 specifies that the shipper may terminate if delay exceeds seventy-two (72) hours.
+prop 6: expect HOLDS                 got HOLDS         OK  ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1 16s | Clause 11 states the carrier is 'not liable for loss or damage caused by ... insufficient packing by the shipper,' which excludes liability for loss caused by the shipper's own packaging; whether loss was so caused is a separate factual que
+effective: 1:C100 2:R0 3:A0 4:R0 5:R0 6:R0 ambiguity 83 -> 17 ruled 4

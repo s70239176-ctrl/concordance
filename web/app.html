@@ -67,6 +67,25 @@
       <div class="small" id="traj" style="margin-top:8px"></div>
     </div>
 
+    <div class="card" id="cFrag" hidden>
+      <h2><span class="no">&#9670;</span>Fragility</h2>
+      <p class="sub">Each party is removed in turn and the record re-derived. If one voice can flip the result, know it before money moves.</p>
+      <div id="fragBody"></div>
+    </div>
+
+    <div class="card" id="cRuling" hidden>
+      <h2><span class="no">&#9878;</span>Rulings</h2>
+      <p class="sub">Where evidence cannot settle a dispute, ask validators one narrow question: does the proposition hold as a matter of what a clause, policy or rule says? Consensus ratifies only HOLDS, DOES NOT HOLD or UNDETERMINED. A ruling settles that proposition; the stored record is never modified.</p>
+      <div id="rulingList"></div>
+      <div id="rulingForm">
+        <label for="rProp">Contested proposition</label><select id="rProp"></select>
+        <label for="rText">Governing text (the clause, policy or rule the question turns on)</label><textarea id="rText" maxlength="1500" placeholder="Paste the exact wording. Validators decide only what this text says; if it depends on facts the text does not settle, the answer is UNDETERMINED."></textarea>
+        <label for="rUrl">Source URL (https, optional)</label><input id="rUrl" placeholder="https://...">
+        <div class="row" style="margin-top:12px"><button class="primary" id="btnRule">Request ruling</button></div>
+        <div class="small" id="rHint" style="margin-top:8px"></div>
+      </div>
+    </div>
+
     <div class="card">
       <h2><span class="no">02</span>Accounts</h2><p class="sub" id="acctSub">Each party states what it saw. Replacing your account before the next convening is allowed.</p>
       <div id="parties"></div>
@@ -87,8 +106,9 @@
       <div id="reqs"></div>
       <div class="two"><div><label for="eBen">Beneficiary address</label><input id="eBen" placeholder="0x..."></div><div><label for="eVal">Amount (GEN)</label><input id="eVal" value="0.001" inputmode="decimal"></div></div>
       <div class="two"><div><label for="eMin">Minimum clarity per requirement (0&ndash;100)</label><input id="eMin" value="0" inputmode="numeric"></div><div></div></div>
-      <div class="row" style="margin-top:12px"><button class="primary" id="btnOpenAct">Lock escrow</button><span class="small" id="relPrev"></span></div>
+      <div class="row" style="margin-top:12px"><button class="primary" id="btnOpenAct">Lock escrow</button><button id="btnOpenPol" hidden title="A separate contract, ConcordanceGate, reads this oracle and pays by it">Lock as gate policy</button><span class="small" id="relPrev"></span></div>
       </div>
+      <div id="pols"></div>
       <div id="acts"></div>
     </div>
     </div>
@@ -103,7 +123,8 @@ import { createClient, createAccount, generatePrivateKey } from "https://esm.sh/
 import { studionet } from "https://esm.sh/genlayer-js@1.1.8/chains";
 
 const C = window.Concordance;
-const DEFAULT_CONTRACT = "0x58E8b84B0b55e9d4d33e5E973CF41D475919ECc7";
+const DEFAULT_CONTRACT = "0x1e7d9A797860faCF5e993AFF715DD2C5d4B1f237"; // Concordance v4 (rulings, fragility)
+const DEFAULT_GATE = "0x620ec49c91469A2fa7Fa0d08bD009d99CCBd6287"; // ConcordanceGate, a separate consumer contract
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -111,14 +132,16 @@ const store = { get: (k) => { try { return localStorage.getItem(k); } catch { re
 
 const params = new URLSearchParams(location.search);
 const CONTRACT = (params.get("contract") || DEFAULT_CONTRACT).trim();
+const GATE = (params.get("gate") || DEFAULT_GATE).trim();
+let gateOk = false;
 $("caddr").textContent = CONTRACT;
 const read = createClient({ chain: studionet });
 let write = null, me = null, cur = null, curId = null;
 
 /* ---------- helpers ---------- */
 function say(html, cls = "") { const b = $("status"); b.hidden = !html; b.className = "banner " + cls; b.innerHTML = html; }
-async function call(fn, args = []) {
-  for (let a = 0; a < 4; a++) { try { return await read.readContract({ address: CONTRACT, functionName: fn, args }); } catch (e) { if (a === 3) throw e; await sleep(1500 * (a + 1)); } }
+async function call(fn, args = [], address = CONTRACT) {
+  for (let a = 0; a < 4; a++) { try { return await read.readContract({ address, functionName: fn, args }); } catch (e) { if (a === 3) throw e; await sleep(1500 * (a + 1)); } }
 }
 const DONE = ["FINALIZED", "ACCEPTED", "UNDETERMINED", "CANCELED", "LEADER_TIMEOUT", "VALIDATORS_TIMEOUT"];
 function needAccount() { if (!write) { say("Connect a wallet or use a burner key first (top right).", "warn"); return false; } return true; }
@@ -128,14 +151,14 @@ function niceError(e) {
   if (/insufficient funds/i.test(m)) return "Your account has too little GEN for this amount. Use “Get test GEN”.";
   return m.split(/\s*(Details:|Version:)/)[0].trim() || m;
 }
-async function tx(label, fn, args, value = 0n) {
+async function tx(label, fn, args, value = 0n, address = CONTRACT) {
   if (!needAccount()) throw new Error("no account");
   const t0 = Date.now(); let timer;
   const tick = () => say(`<span class="spin"></span>${esc(label)}: waiting for validators&hellip; ${Math.round((Date.now() - t0) / 1000)}s`);
   tick(); timer = setInterval(tick, 1000);
   try {
     if (me?.kind === "wallet") await ensureChain();
-    const hash = await write.writeContract({ address: CONTRACT, functionName: fn, args, value });
+    const hash = await write.writeContract({ address, functionName: fn, args, value });
     let t = null;
     for (let i = 0; i < 240; i++) { await sleep(3000); try { t = await read.getTransaction({ hash }); } catch { continue; } if (DONE.includes(t?.statusName)) break; }
     const exec = t?.consensus_data?.leader_receipt?.[0]?.execution_result;
@@ -265,6 +288,11 @@ async function renderDetail(fresh) {
   if (!raw) { cur = null; $("dQ").textContent = "Inquiry not found"; $("dMeta").textContent = "There is no inquiry with this id on this contract. Check the link, or go back to the list."; $("dStatus").textContent = ""; $("dBody").hidden = true; return; }
   $("dBody").hidden = false;
   cur = JSON.parse(raw);
+  cur.eff = null; cur.rulings = [];
+  if (cur.record) { // v4+: the record with rulings applied, and the rulings themselves (older contracts just lack these views)
+    const [eff, rl] = await Promise.all([call("get_effective_record", [curId]).catch(() => ""), call("get_rulings", [curId]).catch(() => "")]);
+    cur.eff = eff ? JSON.parse(eff) : cur.record; cur.rulings = rl ? JSON.parse(rl) : [];
+  }
   $("dQ").textContent = cur.question;
   $("dStatus").textContent = cur.status; $("dStatus").className = "pill " + (cur.status === "CLOSED" ? "closed" : "open");
   $("dMeta").innerHTML = `<span style="font-family:var(--mono)">${esc(curId)} · opened by <code>${esc(cur.opener.slice(0, 8))}…</code> · round ${cur.round}/4</span><ol class="props">${cur.props.map((p, i) => `<li><span class="n">${i + 1}</span><span>${esc(p.text)}</span><span class="tag">weight ${p.weight}</span></li>`).join("")}</ol>`;
@@ -279,15 +307,17 @@ async function renderDetail(fresh) {
   $("btnConvene").disabled = !can;
   $("conveneHint").textContent = closed ? "This inquiry is closed to new accounts." : cur.parties.length < 2 ? "Needs at least two parties before validators can convene." : !cur.dirty ? "Nothing new since the last convening: add or replace an account first." : "Ready: validators will read every account. This takes about 30–120 seconds.";
   renderRecord();
+  renderFrag();
+  renderRuling();
   renderEscrow();
 }
 for (const id of ["aLabel", "aText", "aEv", "aUrls"]) $(id).addEventListener("input", () => { $("aText").dataset.touched = "1"; });
-const stColor = (p) => p.status === "UNSUPPORTED" ? "#77736a" : p.status.startsWith("AGREED") ? "#8fd19e" : p.divergence >= 80 ? "#ff5d4d" : p.divergence >= 55 ? "#f08a3c" : "#e0b040";
-const stText = (p) => p.status === "AGREED_TRUE" ? "AGREED TRUE" : p.status === "AGREED_FALSE" ? "AGREED FALSE" : p.status === "UNSUPPORTED" ? "UNSUPPORTED" : p.lean === "NONE" ? "DEADLOCKED" : "CONTESTED · leans " + p.lean;
+const stColor = (p) => p.status.startsWith("RULED") ? "#ece6d8" : p.status === "UNSUPPORTED" ? "#77736a" : p.status.startsWith("AGREED") ? "#8fd19e" : p.divergence >= 80 ? "#ff5d4d" : p.divergence >= 55 ? "#f08a3c" : "#e0b040";
+const stText = (p) => p.status === "RULED_TRUE" ? "RULED · HOLDS" : p.status === "RULED_FALSE" ? "RULED · DOES NOT HOLD" : p.status === "AGREED_TRUE" ? "AGREED TRUE" : p.status === "AGREED_FALSE" ? "AGREED FALSE" : p.status === "UNSUPPORTED" ? "UNSUPPORTED" : p.lean === "NONE" ? "DEADLOCKED" : "CONTESTED · leans " + p.lean;
 const CAUSE = { FACTUAL: "different facts", DEFINITIONAL: "different meaning", TEMPORAL: "different clock", SCOPE: "different boundary" };
 function renderRecord() {
-  const r = cur.record; $("cRecord").hidden = !r; if (!r) return;
-  $("recSub").textContent = `Round ${cur.round}. Consensus ratifies the ambiguity index and coarse classes; the per-proposition detail is the leader's annotation. ${r.agreed} agreed · ${r.contested} contested · ${r.unsupported} unsupported.`;
+  const r = cur.eff || cur.record; $("cRecord").hidden = !r; if (!r) return;
+  $("recSub").textContent = `Round ${cur.round}. Consensus ratifies the ambiguity index and coarse classes; the per-proposition detail is the leader's annotation. ${r.agreed} agreed · ${r.contested} contested · ${r.unsupported} unsupported${r.ruled ? " · " + r.ruled + " settled by ruling (raw index " + cur.record.ambiguity + ")" : ""}.`;
   $("mark2").style.left = r.ambiguity + "%"; $("ringN").textContent = r.ambiguity;
   const head = `<tr><th>Proposition</th>${cur.parties.slice(0, r.props[0].cells.length).map((p) => `<th>${esc(p.label)}</th>`).join("")}<th>Verdict</th><th>Divergence</th></tr>`;
   const rows = r.props.map((p) => `<tr><td>${p.index + 1}. ${esc(cur.props[p.index].text)}</td>${p.cells.map((c) => c.stance === "SILENT" ? '<td style="text-align:center;color:var(--faint)">–</td>' : `<td style="text-align:center"><span class="cell" style="background:${c.stance === "AFFIRMS" ? "var(--affirm)" : "var(--deny)"};opacity:${(0.4 + c.strength / 100 * 0.6).toFixed(2)}">${c.stance === "AFFIRMS" ? "yes" : "no"} ${c.strength}</span></td>`).join("")}<td><span class="pod v" style="background:${stColor(p)}">${stText(p)}</span></td><td><div class="bar"><i style="width:${p.divergence}%;background:${stColor(p)}"></i></div><span class="small">${p.divergence}%</span></td></tr>`).join("");
@@ -295,6 +325,37 @@ function renderRecord() {
   $("whyList").innerHTML = r.props.filter((p) => p.status === "CONTESTED" && p.crux).map((p) => `<div class="whyrow"><span class="tag">${CAUSE[p.cause] || p.cause}</span><b>${p.index + 1}.</b> ${esc(p.crux)}</div>`).join("");
   call("get_trajectory", [curId]).then((t) => { const a = JSON.parse(t || "[]"); $("traj").textContent = a.length ? "Ambiguity by round: " + a.map((x) => `round ${x.round}: ${x.ambiguity}`).join(" → ") : ""; }).catch(() => {});
 }
+function renderFrag() {
+  const rec = cur.record; $("cFrag").hidden = !rec; if (!rec) return;
+  const f = C.fragility(rec), n = rec.props.length; let maxd = 1; f.parties.forEach((e) => { maxd = Math.max(maxd, Math.abs(e.delta)); });
+  const name = (j) => (cur.parties[j] && cur.parties[j].label) || ("party " + (j + 1));
+  const head = f.pivotal === null ? "<b>Robust.</b> No single party’s removal changes any proposition."
+    : `<b>${esc(name(f.pivotal))} is pivotal.</b> Remove them and ${f.parties[f.pivotal].flips.length} of ${n} proposition${f.parties[f.pivotal].flips.length === 1 ? "" : "s"} change class or lean${f.parties[f.pivotal].ambiguity !== f.base_ambiguity ? `; the ambiguity index goes ${f.base_ambiguity} → ${f.parties[f.pivotal].ambiguity}` : ""}.`;
+  $("fragBody").innerHTML = `<div class="banner ${f.pivotal === null ? "good" : "warn"}" style="margin:0 0 12px">${head}</div>` + f.parties.map((e) => {
+    const w = Math.max(2, Math.round(Math.abs(e.delta) / maxd * 100));
+    return `<div style="display:grid;grid-template-columns:150px 1fr;gap:12px;align-items:center;padding:8px 0;border-top:1px solid var(--rule)"><span style="font:500 15px var(--serif)">${esc(name(e.party))}${e.party === f.pivotal ? ' <span class="tag rule" style="margin:0 0 0 4px">pivotal</span>' : ""}</span><div><div style="display:flex;align-items:center;gap:10px"><div class="bar" style="flex:1"><i style="width:${w}%;background:${e.delta < 0 ? "#8fd19e" : "#e0b040"}"></i></div><b style="font:500 12px var(--mono);min-width:44px;text-align:right">${e.delta > 0 ? "+" : ""}${e.delta}</b></div><div class="small" style="margin-top:3px">${e.flips.length ? "flips: " + e.flips.map((i) => esc((cur.props[i].text || "").slice(0, 46))).join("; ") : "changes no proposition"}</div></div></div>`;
+  }).join("");
+}
+const VTEXT = { HOLDS: "HOLDS", DOES_NOT_HOLD: "DOES NOT HOLD", UNDETERMINED: "UNDETERMINED" };
+function renderRuling() {
+  const rec = cur.record; $("cRuling").hidden = !rec; if (!rec) return;
+  const by = {}; (cur.rulings || []).forEach((r) => { by[r.prop] = r; });
+  $("rulingList").innerHTML = (cur.rulings || []).map((r) => `<div class="party" style="border-left-color:#ece6d8"><b>&#9878; ${r.prop + 1}. ${esc((cur.props[r.prop] || {}).text || "")}</b><div><span class="tag ${r.verdict === "UNDETERMINED" ? "" : "fix"}">${VTEXT[r.verdict]}</span><span class="tag">attempt ${r.attempt}</span></div><div class="a">${esc(r.reason || "")}</div><div class="e">Governing text: ${esc((r.source || "").slice(0, 280))}${(r.source || "").length > 280 ? "…" : ""}</div></div>`).join("");
+  const closed = cur.status === "CLOSED";
+  const open = cur.record.props.filter((p) => p.status === "CONTESTED" && !(by[p.index] && (by[p.index].verdict !== "UNDETERMINED" || by[p.index].attempt >= 2)));
+  $("rulingForm").hidden = closed || !open.length;
+  const sel = $("rProp"), keep = sel.value;
+  sel.innerHTML = open.map((p) => `<option value="${p.index}">${p.index + 1}. ${esc(cur.props[p.index].text.slice(0, 90))}${p.cause === "DEFINITIONAL" ? " (disagreement about meaning)" : ""}</option>`).join("");
+  if (open.some((p) => String(p.index) === keep)) sel.value = keep;
+  $("rHint").textContent = closed ? "" : !open.length ? "" : "Anyone can request a ruling. It runs on the same validators, in a single consensus round (about 20–30 s).";
+}
+$("btnRule").onclick = async () => {
+  const idx = parseInt($("rProp").value, 10), text = $("rText").value.trim(), url = $("rUrl").value.trim();
+  if (!Number.isInteger(idx)) return say("Pick a contested proposition.", "warn");
+  if (!text) return say("Paste the governing text the question turns on.", "warn");
+  if (url && !url.startsWith("https://")) return say("The source URL must be https.", "warn");
+  try { $("btnRule").disabled = true; await tx("Request ruling", "request_ruling", [curId, idx, text, url]); $("rText").value = ""; await renderDetail(false); } catch {} finally { $("btnRule").disabled = false; }
+};
 $("btnRefresh").onclick = () => renderDetail(false);
 $("btnSubmitAcct").onclick = async () => {
   const label = $("aLabel").value.trim(), text = $("aText").value.trim(), ev = $("aEv").value.trim();
@@ -318,13 +379,13 @@ function renderEscrow() {
     $("reqs").dataset.for = curId;
     $("reqs").innerHTML = '<label>Required propositions (what must be true for funds to release)</label>' + cur.props.map((p, i) => `<div class="row" style="margin:6px 0"><select data-i="${i}" aria-label="Requirement ${i + 1}" style="width:130px"><option value="">not required</option><option value="TRUE">must be TRUE</option><option value="FALSE">must be FALSE</option></select><span class="small">${i + 1}. ${esc(p.text)}</span></div>`).join("");
   }
-  previewRelease(); drawActs();
+  previewRelease(); drawActs(); drawPols();
 }
 $("reqs").addEventListener("change", () => { if (cur) previewRelease(); });
 function readReqs() { const rp = [], rw = []; document.querySelectorAll("#reqs select").forEach((s) => { if (s.value) { rp.push(+s.dataset.i); rw.push(s.value); } }); return { rp, rw }; }
 function previewRelease() {
   const { rp, rw } = readReqs(); if (!cur || !cur.record || !rp.length) { $("relPrev").textContent = ""; return; }
-  const pct = C.releaseFraction(cur.record.props, rp, rw, parseInt($("eMin").value, 10) || 0);
+  const pct = C.releaseFraction((cur.eff || cur.record).props, rp, rw, parseInt($("eMin").value, 10) || 0);
   $("relPrev").textContent = `On the current record, ${pct}% would be releasable now.`;
 }
 $("eMin").addEventListener("input", () => { if (cur) previewRelease(); });
@@ -345,7 +406,7 @@ async function drawActs() {
   const out = [];
   for (const id of ids) {
     const raw = await call("get_action", [id]).catch(() => ""); if (!raw) continue; const a = JSON.parse(raw);
-    const pct = cur && cur.record ? C.releaseFraction(cur.record.props, a.req_props, a.req_wants, a.min_clarity) : 0;
+    const pct = cur && cur.record ? C.releaseFraction((cur.eff || cur.record).props, a.req_props, a.req_wants, a.min_clarity) : 0;
     const el = document.createElement("div"); el.className = "act";
     const open = a.status === "OPEN";
     el.innerHTML = `<b>${esc(id)}</b> · ${esc(a.status)} · locked ${gen(bigOf(raw, "escrow"))} · paid ${gen(bigOf(raw, "paid"))} · justified now ${pct}%${open ? ` <div class="row" style="margin-top:8px"><button data-x="execute_action">Execute release</button><button data-x="close_action">Close &amp; refund remainder</button></div>` : ""}`;
@@ -354,6 +415,34 @@ async function drawActs() {
   }
   if (mine !== curId) return; // user navigated away while loading
   box.innerHTML = out.length ? '<label>Your escrows on this inquiry</label>' : ""; out.forEach((el) => box.appendChild(el));
+}
+
+/* ---------- gate: a separate contract that reads this oracle and pays by it ---------- */
+const myPols = () => { try { return JSON.parse(store.get("cc_pols_" + curId) || "[]"); } catch { return []; } };
+(async () => { try { gateOk = (await call("get_concordance", [], GATE)).toLowerCase() === CONTRACT.toLowerCase(); } catch { gateOk = false; } $("btnOpenPol").hidden = !gateOk; })();
+$("btnOpenPol").onclick = async () => {
+  const { rp, rw } = readReqs(); const ben = $("eBen").value.trim();
+  if (!rp.length) return say("Mark at least one proposition as required.", "warn");
+  if (!/^0x[0-9a-fA-F]{40}$/.test(ben)) return say("Beneficiary must be a 0x address (42 characters).", "warn");
+  let wei; try { wei = toWei($("eVal").value); } catch { return say("Amount must be a number.", "warn"); }
+  if (wei <= 0n) return say("Amount must be above zero.", "warn");
+  const pid = "pol-" + Math.random().toString(36).slice(2, 8);
+  try { $("btnOpenPol").disabled = true; await tx("Lock gate policy", "open_policy", [pid, curId, ben, rp, rw, parseInt($("eMin").value, 10) || 0], wei, GATE); const l = myPols(); l.push(pid); store.set("cc_pols_" + curId, JSON.stringify(l)); drawPols(); } catch {} finally { $("btnOpenPol").disabled = false; }
+};
+async function drawPols() {
+  const box = $("pols"); const mine = curId; const ids = myPols(); if (!gateOk || !ids.length) { box.innerHTML = ""; return; }
+  const out = [];
+  for (const id of ids) {
+    const raw = await call("get_policy", [id], GATE).catch(() => ""); if (!raw) continue; const a = JSON.parse(raw);
+    const pct = cur && cur.record ? C.releaseFraction((cur.eff || cur.record).props, a.req_props, a.req_wants, a.min_clarity) : 0;
+    const el = document.createElement("div"); el.className = "act";
+    const open = a.status === "OPEN";
+    el.innerHTML = `<b>${esc(id)}</b> · gate policy · ${esc(a.status)} · locked ${gen(bigOf(raw, "escrow"))} · paid ${gen(bigOf(raw, "paid"))} · the oracle justifies ${pct}% now${open ? ` <div class="row" style="margin-top:8px"><button data-x="claim">Claim (reads the oracle)</button><button data-x="refund">Refund remainder</button></div>` : ""}`;
+    el.querySelectorAll("button").forEach((b) => b.onclick = async () => { try { await tx(b.textContent, b.dataset.x, [id], 0n, GATE); await renderDetail(false); } catch {} });
+    out.push(el);
+  }
+  if (mine !== curId) return;
+  box.innerHTML = out.length ? '<label>Your gate policies (a separate contract reads this oracle across contracts)</label>' : ""; out.forEach((el) => box.appendChild(el));
 }
 
 /* ---------- motion: entrances (content never depends on them to be visible) ---------- */

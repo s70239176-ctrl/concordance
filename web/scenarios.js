@@ -44,7 +44,7 @@
       { text: "The cargo stayed within the contracted temperature band.", short: "Cold chain intact", weight: 9 },
       { text: "The hold was safety-driven rather than commercial convenience.", short: "Safety-driven hold", weight: 6 },
       { text: "Total delay exceeded 72 hours under the contract's own definition.", short: "Delay over 72h", weight: 5 },
-      { text: "The force-majeure clause applies to this delay.", short: "Force majeure applies", weight: 9 }
+      { text: "An anchorage hold counts as a \u2018port closure\u2019 under the force-majeure clause.", short: "Hold = \u2018port closure\u2019", weight: 9 }
     ],
     rounds: [
       {

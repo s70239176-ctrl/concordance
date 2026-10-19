@@ -1,0 +1,10 @@
+inquiry clause-mvfuj53k
+convene ACCEPTED MAJORITY_AGREE rounds 1
+record statuses: 1:C100 2:C100 3:C100 4:C100 5:C100 ambiguity 100
+fragility: {"fragility":100,"pivotal":0,"fragile":[0,1,2,3,4]}
+prop 1: expect DOES_NOT_HOLD got DOES_NOT_HOLD ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1 22s | ‘Port closure’ means a formal order ... a vessel waiting in an anchorage queue without such an order is not subject to a port closure
+prop 2: expect HOLDS         got HOLDS         ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1 18s | 'Port closure' means a formal order of the harbour master or port authority
+prop 3: expect HOLDS         got HOLDS         ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1 29s | Clause 14.2 explicitly lists 'a labour strike affecting the port' as one of the enumerated force majeure events.
+prop 4: expect DOES_NOT_HOLD got DOES_NOT_HOLD ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1 25s | Clause 3 explicitly states that delay is measured 'from the end of the contractual departure window to the actual departure' and that 'no estimated time of arrival is used to measure delay,' directly contradicting the proposition.
+prop 5: expect UNDETERMINED  got UNDETERMINED  ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1 18s | Clause 9 makes the carrier liable for spoilage 'caused by a failure of the reefer unit' but not liable 'where reefer telemetry shows supply air within the contract band throughout the voyage,' and the proposition depends on which factual co
+effective: 1:R0 2:R0 3:R0 4:R0 5:C100 ambiguity 100 -> 20 ruled 4
