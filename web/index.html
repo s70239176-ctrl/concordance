@@ -271,6 +271,7 @@ function drawVals(reveal, checked){
 }
 function setBanner(txt, cls){ var b = $("banner"); b.className = "banner " + (cls||""); b.innerHTML = txt; }
 
+function setNum(el, text){ el._tw = (el._tw || 0) + 1; el.textContent = text; } // direct set that also cancels any pending ticker
 function tween(el, to, fmt){
   var from = parseFloat(el.dataset.v || "0") || 0; el.dataset.v = to;
   var id = (el._tw = (el._tw || 0) + 1);
@@ -281,7 +282,7 @@ function tween(el, to, fmt){
 }
 function drawMetrics(){
   var rec = st.rec, mk = $("mark");
-  if (!rec){ $("amb").textContent = "--"; mk.style.left = "0%"; mk.style.opacity = ".25"; $("cA").textContent = $("cC").textContent = $("cU").textContent = "-"; return; }
+  if (!rec){ setNum($("amb"), "--"); mk.style.left = "0%"; mk.style.opacity = ".25"; setNum($("cA"), "-"); setNum($("cC"), "-"); setNum($("cU"), "-"); return; }
   tween($("amb"), rec.ambiguity, String);
   mk.style.opacity = "1"; mk.style.left = rec.ambiguity + "%";
   tween($("cA"), rec.agreed, String); tween($("cC"), rec.contested, String); tween($("cU"), rec.unsupported, String);
@@ -394,7 +395,7 @@ async function convene(){
   var hunt = null, mk = $("mark"), ab = $("amb");
   if (!reduce){ // the needle hunts for the pitch while validators read, then settles
     mk.classList.add("hunt"); ab.classList.add("hunting"); mk.style.opacity = "1";
-    hunt = setInterval(function(){ var n = 14 + Math.round(Math.random() * 78); mk.style.left = n + "%"; ab.textContent = n; ab.dataset.v = n; }, 430);
+    hunt = setInterval(function(){ var n = 14 + Math.round(Math.random() * 78); mk.style.left = n + "%"; setNum(ab, n); ab.dataset.v = n; }, 430);
   }
   await sleep(900);
   for (var i = 0; i < 5; i++){ await sleep(380); var bars = document.querySelectorAll(".bars")[i]; if (bars) bars.classList.add("on"); }
