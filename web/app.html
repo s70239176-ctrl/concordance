@@ -221,7 +221,11 @@ $("list").addEventListener("click", (e) => { const t = e.target.closest(".inq");
 $("list").addEventListener("keydown", (e) => { if (e.key === "Enter") { const t = e.target.closest(".inq"); if (t) openInquiry(t.dataset.id); } });
 $("btnNew").onclick = () => { show("vNew"); if (!$("nprops").children.length) { addProp(); addProp(); } };
 $("btnNewBack").onclick = () => show("vList");
-$("btnBack").onclick = () => { curId = null; show("vList"); loadList(); history.replaceState(null, "", location.pathname + (params.get("contract") ? "?contract=" + CONTRACT : "")); };
+const listUrl = () => location.pathname + (params.get("contract") ? "?contract=" + CONTRACT : "");
+function showList(push) { curId = null; cur = null; show("vList"); loadList(); if (push) history.pushState({ list: true }, "", listUrl()); }
+// Back button: if this detail view was opened from the list, step back through history; otherwise (deep link) go to the list.
+$("btnBack").onclick = () => { if (history.state && history.state.id) history.back(); else showList(true); };
+window.addEventListener("popstate", () => { const id = new URLSearchParams(location.search).get("inquiry"); if (id) openInquiry(id, false); else showList(false); });
 
 /* ---------- new inquiry ---------- */
 function addProp(text = "", w = 5) {
@@ -246,8 +250,11 @@ $("btnCreate").onclick = async () => {
 };
 
 /* ---------- detail ---------- */
-async function openInquiry(id) {
-  curId = id; show("vDetail"); history.replaceState(null, "", "?" + new URLSearchParams({ ...(params.get("contract") ? { contract: CONTRACT } : {}), inquiry: id }));
+async function openInquiry(id, push = true) {
+  const url = "?" + new URLSearchParams({ ...(params.get("contract") ? { contract: CONTRACT } : {}), inquiry: id });
+  if (curId !== id) { $("aText").dataset.touched = ""; $("reqs").dataset.for = ""; } // do not carry one inquiry's draft into another
+  curId = id; show("vDetail");
+  if (push) history.pushState({ id }, "", url); else history.replaceState({ id }, "", url);
   await renderDetail(true);
 }
 const lc = (s) => String(s || "").toLowerCase();
@@ -369,7 +376,7 @@ document.documentElement.classList.add("js");
 /* ---------- boot ---------- */
 (async () => {
   const want = params.get("inquiry");
-  if (want) await openInquiry(want); else { show("vList"); await loadList(); }
+  if (want) await openInquiry(want, false); else { history.replaceState({ list: true }, "", location.href); show("vList"); await loadList(); }
 })();
 </script>
 </body>
