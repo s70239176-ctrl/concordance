@@ -81,9 +81,9 @@ Or use the scripts (throwaway key generated locally): `npm install && node scrip
 node scripts/measure.mjs 2 && node scripts/extract-records.mjs`.
 
 ## Deploy the frontend (Vercel)
-The UI is static files in `web/`, no build step. `vercel.json` at the repo root points Vercel at `web/`, so importing
-the repo works as is. (Alternative: leave `vercel.json` out and set **Root Directory** to `web` in the project
-settings, Framework Preset "Other".) Pages: `/` is the showcase demo, `/app` is the live app.
+The UI is static files in `web/`, no build step. Two equivalent setups, both configured in the repo: import the repo as is
+(the root `vercel.json` points Vercel at `web/`), or set **Root Directory** to `web` with Framework Preset "Other"
+(then `web/vercel.json` is the one Vercel reads). Pages: `/` is the showcase demo, `/app` is the live app.
 
 ## Prior art (checked October 2026)
 Single-verdict escrow and court projects, precedent registries and charter gates exist on GenLayer. I did not find
