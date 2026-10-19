@@ -165,6 +165,7 @@ async function tx(label, fn, args, value = 0n, address = CONTRACT) {
     if (t?.statusName === "UNDETERMINED") throw new Error(`${label}: validators did not reach agreement (${t.result_name}). You can try again.`);
     if (exec === "ERROR") throw new Error(`${label}: the contract rejected this call (a rule was not met, e.g. permissions, limits or state).`);
     if (!DONE.includes(t?.statusName)) throw new Error(`${label}: timed out waiting for the network.`);
+    await sleep(2500); // Studio views can lag a write by a couple of seconds; settle before the caller refreshes
     say(`${esc(label)} done (${t.statusName}${t.result_name ? " · " + t.result_name : ""}${t.num_of_rounds ? " · " + t.num_of_rounds + " consensus round" + (Number(t.num_of_rounds) > 1 ? "s" : "") : ""}, ${Math.round((Date.now() - t0) / 1000)}s).`, "good");
     return { hash, t };
   } catch (e) { say(esc(niceError(e)), "bad"); throw e; } finally { clearInterval(timer); }
@@ -237,6 +238,16 @@ async function loadList() {
     const rows = JSON.parse(await call("list_inquiries", [0, 50]));
     $("listSub").textContent = rows.length ? `${rows.length} inquir${rows.length === 1 ? "y" : "ies"}, newest first. Anyone can open one; anyone can add an account.` : "No inquiries yet. Open the first one.";
     $("list").innerHTML = rows.map((r, i) => `<div class="inq" style="--d:${(i * 0.06).toFixed(2)}s" tabindex="0" role="button" data-id="${esc(r.inquiry_id)}"><div><div class="q">${esc(r.question)}</div><div class="meta">${esc(r.inquiry_id)} · ${r.parties} part${r.parties === 1 ? "y" : "ies"} · round ${r.round}${r.contested != null ? " · " + r.contested + " contested" : ""}</div></div><div class="row"><span class="amb" style="color:${ambColor(r.ambiguity)}">${r.ambiguity == null ? "–" : r.ambiguity}</span><span class="pill ${r.status === "CLOSED" ? "closed" : "open"}">${esc(r.status)}</span></div></div>`).join("");
+    // the list view only has the stored (raw) index; fetch the effective one so rulings show up here too
+    rows.filter((r) => r.ambiguity != null).slice(0, 12).forEach(async (r) => {
+      try {
+        const e = JSON.parse(await call("get_effective_record", [r.inquiry_id]));
+        if (!e.ruled) return;
+        const el = document.querySelector(`.inq[data-id="${CSS.escape(r.inquiry_id)}"] .amb`); if (!el) return;
+        el.textContent = e.ambiguity; el.style.color = ambColor(e.ambiguity); el.title = `${e.ruled} ruling${e.ruled === 1 ? "" : "s"} applied (stored index ${r.ambiguity})`;
+        el.insertAdjacentHTML("afterend", `<span class="tag" title="settled by ruling" style="margin:0">&#9878; ${e.ruled}</span>`);
+      } catch {}
+    });
   } catch (e) { $("listSub").textContent = "Could not read the chain: " + (e.message || e); }
 }
 const ambColor = (a) => a == null ? "var(--faint)" : a >= 55 ? "var(--hot)" : a >= 30 ? "var(--amber)" : "var(--agreed)";
