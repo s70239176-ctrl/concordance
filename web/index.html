@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Concordance · The Inter-Subjective Oracle</title>
 <meta name="description" content="A GenLayer Intelligent Contract that does not collapse disagreement into one answer. It records what everyone agrees on, how much they disagree, why, and lets money move in proportion.">
+<meta property="og:type" content="website"><meta property="og:title" content="Concordance: an inter-subjective oracle on GenLayer">
+<meta property="og:description" content="Validators agree on what is settled, what is contested and why. Money moves in proportion to how settled the facts are.">
+<meta name="theme-color" content="#0d0e11">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..600&family=Instrument+Sans:wght@400..700&family=JetBrains+Mono:wght@400..700&display=swap">
 <link rel="stylesheet" href="concordance.css">
@@ -270,9 +273,11 @@ function setBanner(txt, cls){ var b = $("banner"); b.className = "banner " + (cl
 
 function tween(el, to, fmt){
   var from = parseFloat(el.dataset.v || "0") || 0; el.dataset.v = to;
+  var id = (el._tw = (el._tw || 0) + 1);
   if (reduce){ el.textContent = fmt(to); return; }
   var t0 = performance.now(), d = 1100;
-  (function f(t){ var k = Math.min(1,(t-t0)/d), e = 1-Math.pow(1-k,3); el.textContent = fmt(Math.round(from+(to-from)*e)); if (k<1) requestAnimationFrame(f); })(t0);
+  (function f(t){ if (el._tw !== id) return; var k = Math.min(1,(t-t0)/d), e = 1-Math.pow(1-k,3); el.textContent = fmt(Math.round(from+(to-from)*e)); if (k<1) requestAnimationFrame(f); })(t0);
+  setTimeout(function(){ if (el._tw === id) el.textContent = fmt(to); }, d + 150); // frames are paused in background tabs; the number must still land
 }
 function drawMetrics(){
   var rec = st.rec, mk = $("mark");
@@ -539,12 +544,19 @@ $("tstop").addEventListener("click", function(){ if (tour.on) tour.stop = true; 
 document.addEventListener("keydown", function(e){ if (e.key === "Escape" && tour.on) tour.stop = true; });
 
 document.documentElement.classList.add("js");
-(function(){ // staggered reveals as sections enter view
-  var els = [].slice.call(document.querySelectorAll(".hero>*, .q, .grid .card, .card.sec, .why>div"));
-  els.forEach(function(e, i){ e.classList.add("reveal"); e.style.setProperty("--d", (Math.min(i % 6, 5) * 0.07).toFixed(2) + "s"); });
-  if (!("IntersectionObserver" in window)){ els.forEach(function(e){ e.classList.add("in"); }); return; }
-  var io = new IntersectionObserver(function(en){ en.forEach(function(x){ if (x.isIntersecting){ x.target.classList.add("in"); io.unobserve(x.target); } }); }, {threshold:.06, rootMargin:"0px 0px -3% 0px"});
-  els.forEach(function(e){ io.observe(e); });
+(function(){ // entrances: above-the-fold content animates by CSS alone; below-the-fold reveals on scroll, with a fallback so nothing can stay hidden
+  var els = [].slice.call(document.querySelectorAll(".hero>*, .q, .grid .card, .card.sec, .why>div")), vh = window.innerHeight || 800, below = [];
+  els.forEach(function(e, i){
+    if (e.hidden || e.closest("[hidden]")) return;
+    if (e.getBoundingClientRect().top < vh * 0.95){ e.classList.add("rise"); e.style.setProperty("--d", (Math.min(i, 6) * 0.07).toFixed(2) + "s"); }
+    else { e.classList.add("reveal"); below.push(e); }
+  });
+  var show = function(e){ e.classList.add("in"); };
+  if (!("IntersectionObserver" in window)){ below.forEach(show); return; }
+  var alive = false;
+  var io = new IntersectionObserver(function(en){ alive = true; en.forEach(function(x){ if (x.isIntersecting){ show(x.target); io.unobserve(x.target); } }); }, {threshold:.06, rootMargin:"0px 0px -3% 0px"});
+  below.forEach(function(e){ io.observe(e); });
+  setTimeout(function(){ if (!alive) below.forEach(show); }, 2500);
 })();
 setMode("scripted");
 })();

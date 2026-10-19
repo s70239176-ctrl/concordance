@@ -37,7 +37,7 @@ header.top,header:not(.top){display:flex;align-items:center;justify-content:spac
 .chip{font:500 10.5px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);border:0;background:none;padding:0;white-space:nowrap}
 .chip b{color:var(--paper);font-weight:600}
 .chip+.chip::before{content:"/";margin-right:14px;color:var(--rule2)}
-a.chip{text-decoration:none;color:var(--brass);border-bottom:1px solid var(--brass);padding-bottom:1px}
+a.chip{text-decoration:none;color:var(--brass);border-bottom:1px solid var(--brass);padding:11px 0 1px;margin:-10px 0 0}
 a.chip::before{display:none}
 
 /* ---------- editorial hero ---------- */
@@ -272,6 +272,8 @@ h1{font:350 clamp(30px,4.4vw,52px)/1.04 var(--serif);letter-spacing:-.03em;margi
 .act b{color:var(--paper)}
 
 /* ---------- motion ---------- */
+.js .rise{animation:rise .9s cubic-bezier(.2,.7,.2,1) both;animation-delay:var(--d,0s)}
+@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
 .js .reveal{opacity:0;transform:translateY(18px);transition:opacity .9s cubic-bezier(.2,.7,.2,1),transform .9s cubic-bezier(.2,.7,.2,1);transition-delay:var(--d,0s)}
 .js .reveal.in{opacity:1;transform:none}
 .ghost-ribbon{fill:none;stroke:var(--faint);stroke-width:1.2;stroke-dasharray:2 7;stroke-linecap:round;opacity:.75;animation:march 1.4s linear infinite;animation-delay:var(--gd,0s)}

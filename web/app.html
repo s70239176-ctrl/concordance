@@ -9,7 +9,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..600&family=Instrument+Sans:wght@400..700&family=JetBrains+Mono:wght@400..700&display=swap">
 <link rel="stylesheet" href="concordance.css">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230d0e11'/%3E%3Cpath d='M4 12 C11 5 21 5 28 12' stroke='%234cc9c0' fill='none' stroke-width='2.4'/%3E%3Cpath d='M4 20 C11 27 21 27 28 20' stroke='%23ff7a59' fill='none' stroke-width='2.4'/%3E%3Crect x='14.5' y='13.5' width='3' height='5' fill='%23e0b040'/%3E%3C/svg%3E">
-<style>.wrap{max-width:1100px}</style>
+<style>.wrap{max-width:1100px}#status{position:sticky;top:10px;z-index:30;background:#16181d;box-shadow:0 10px 30px -12px #000}</style>
 </head>
 <body>
 <div class="wrap">
@@ -57,6 +57,7 @@
       <div class="small" id="dMeta"></div>
     </div>
 
+    <div id="dBody">
     <div class="card" id="cRecord" hidden>
       <h2><span class="no">&#9670;</span>Agreement record</h2><p class="sub" id="recSub"></p>
       <div class="tuner" style="margin:10px 0 22px"><div class="readout"><b id="ringN">--</b><span>ambiguity index<br>0 concord &middot; 100 discord</span></div>
@@ -81,11 +82,15 @@
     <div class="card" id="cEscrow" hidden>
       <h2><span class="no">03</span>Ambiguity-priced escrow</h2>
       <p class="sub">Lock funds that release in proportion to how settled the required propositions are. Releases only ratchet up; the funder reclaims the rest once the inquiry is closed.</p>
+      <p class="small" id="escClosed" hidden>This inquiry is closed, so no new escrow can be locked. Existing escrows can still be closed to refund what is unspent.</p>
+      <div id="escForm">
       <div id="reqs"></div>
       <div class="two"><div><label for="eBen">Beneficiary address</label><input id="eBen" placeholder="0x..."></div><div><label for="eVal">Amount (GEN)</label><input id="eVal" value="0.001" inputmode="decimal"></div></div>
       <div class="two"><div><label for="eMin">Minimum clarity per requirement (0&ndash;100)</label><input id="eMin" value="0" inputmode="numeric"></div><div></div></div>
       <div class="row" style="margin-top:12px"><button class="primary" id="btnOpenAct">Lock escrow</button><span class="small" id="relPrev"></span></div>
+      </div>
       <div id="acts"></div>
+    </div>
     </div>
   </section>
 
@@ -144,18 +149,19 @@ async function tx(label, fn, args, value = 0n) {
 
 /* ---------- account ---------- */
 function setMe(address, kind) {
-  me = { address, kind }; $("whochip").hidden = false; $("whochip").innerHTML = `<b>${kind === "wallet" ? "Wallet" : "Burner"}</b> ${address.slice(0, 6)}&hellip;${address.slice(-4)}`;
+  me = { address, kind }; $("whochip").hidden = false; $("whochip").innerHTML = `<b>${kind === "wallet" ? "Wallet" : "Burner"}</b> <span style="text-transform:none;letter-spacing:0">${address.slice(0, 6)}&hellip;${address.slice(-4)}</span>`;
   $("btnWallet").textContent = "Switch wallet"; $("btnFund").hidden = false;
   if (curId) renderDetail();
 }
-$("btnBurner").onclick = () => {
+function useBurner(quiet) {
   let pk = store.get("cc_burner");
   if (!pk) { pk = generatePrivateKey(); store.set("cc_burner", pk); }
   const acc = createAccount(pk);
   write = createClient({ chain: studionet, account: acc });
   setMe(acc.address, "burner");
-  say("Burner key ready. It lives only in this browser and is for this test network; never reuse it elsewhere.", "good");
-};
+  if (!quiet) say("Burner key ready. It lives only in this browser and is for this test network; never reuse it elsewhere.", "good");
+}
+$("btnBurner").onclick = () => useBurner(false);
 const STUDIO_HEX = "0x" + studionet.id.toString(16);
 async function ensureChain() {
   const p = window.ethereum; if (!p) throw new Error("No wallet found.");
@@ -198,7 +204,7 @@ $("btnFund").onclick = async () => {
     say("Added test GEN to " + me.address.slice(0, 8) + "…", "good");
   } catch (e) { say("Faucet failed: " + esc(e.message || e), "bad"); }
 };
-if (store.get("cc_burner") && !window.ethereum) $("btnBurner").click();
+if (store.get("cc_burner") && !window.ethereum) useBurner(true);
 
 /* ---------- views ---------- */
 function show(v) { for (const id of ["vList", "vNew", "vDetail"]) $(id).hidden = id !== v; window.scrollTo(0, 0); }
@@ -247,9 +253,10 @@ async function openInquiry(id) {
 const lc = (s) => String(s || "").toLowerCase();
 async function renderDetail(fresh) {
   if (!curId) return;
-  if (fresh || !cur) { $("dQ").textContent = "Loading…"; }
+  if (fresh || !cur) { $("dQ").textContent = "Loading…"; $("dMeta").textContent = ""; $("dBody").hidden = true; }
   let raw; try { raw = await call("get_inquiry", [curId]); } catch (e) { return say("Could not read the chain: " + esc(e.message || e), "bad"); }
-  if (!raw) { $("dQ").textContent = "Inquiry not found"; return; }
+  if (!raw) { cur = null; $("dQ").textContent = "Inquiry not found"; $("dMeta").textContent = "There is no inquiry with this id on this contract. Check the link, or go back to the list."; $("dStatus").textContent = ""; $("dBody").hidden = true; return; }
+  $("dBody").hidden = false;
   cur = JSON.parse(raw);
   $("dQ").textContent = cur.question;
   $("dStatus").textContent = cur.status; $("dStatus").className = "pill " + (cur.status === "CLOSED" ? "closed" : "open");
@@ -298,17 +305,22 @@ $("btnClose").onclick = async () => { try { await tx("Close inquiry", "close_inq
 const myActs = () => { try { return JSON.parse(store.get("cc_acts_" + curId) || "[]"); } catch { return []; } };
 function renderEscrow() {
   const r = cur.record; $("cEscrow").hidden = !r; if (!r) return;
-  $("reqs").innerHTML = '<label>Required propositions (what must be true for funds to release)</label>' + cur.props.map((p, i) => `<div class="row" style="margin:6px 0"><select data-i="${i}" aria-label="Requirement ${i + 1}" style="width:130px"><option value="">not required</option><option value="TRUE">must be TRUE</option><option value="FALSE">must be FALSE</option></select><span class="small">${i + 1}. ${esc(p.text)}</span></div>`).join("");
-  $("reqs").addEventListener("change", previewRelease);
+  const closed = cur.status === "CLOSED";
+  $("escForm").hidden = closed; $("escClosed").hidden = !closed;
+  if ($("reqs").dataset.for !== curId) { // build once per inquiry so refreshes do not reset the user's choices
+    $("reqs").dataset.for = curId;
+    $("reqs").innerHTML = '<label>Required propositions (what must be true for funds to release)</label>' + cur.props.map((p, i) => `<div class="row" style="margin:6px 0"><select data-i="${i}" aria-label="Requirement ${i + 1}" style="width:130px"><option value="">not required</option><option value="TRUE">must be TRUE</option><option value="FALSE">must be FALSE</option></select><span class="small">${i + 1}. ${esc(p.text)}</span></div>`).join("");
+  }
   previewRelease(); drawActs();
 }
+$("reqs").addEventListener("change", () => { if (cur) previewRelease(); });
 function readReqs() { const rp = [], rw = []; document.querySelectorAll("#reqs select").forEach((s) => { if (s.value) { rp.push(+s.dataset.i); rw.push(s.value); } }); return { rp, rw }; }
 function previewRelease() {
-  const { rp, rw } = readReqs(); if (!cur.record || !rp.length) { $("relPrev").textContent = ""; return; }
+  const { rp, rw } = readReqs(); if (!cur || !cur.record || !rp.length) { $("relPrev").textContent = ""; return; }
   const pct = C.releaseFraction(cur.record.props, rp, rw, parseInt($("eMin").value, 10) || 0);
   $("relPrev").textContent = `On the current record, ${pct}% would be releasable now.`;
 }
-$("eMin").addEventListener("input", previewRelease);
+$("eMin").addEventListener("input", () => { if (cur) previewRelease(); });
 const toWei = (s) => { const [a, b = ""] = String(s).trim().split("."); if (!/^\d+$/.test(a || "0") || !/^\d*$/.test(b)) throw new Error("bad amount"); return BigInt(a || "0") * 10n ** 18n + BigInt((b + "0".repeat(18)).slice(0, 18)); };
 $("btnOpenAct").onclick = async () => {
   const { rp, rw } = readReqs(); const ben = $("eBen").value.trim();
@@ -319,24 +331,40 @@ $("btnOpenAct").onclick = async () => {
   const aid = "act-" + Math.random().toString(36).slice(2, 8);
   try { $("btnOpenAct").disabled = true; await tx("Lock escrow", "open_action", [aid, curId, ben, rp, rw, parseInt($("eMin").value, 10) || 0], wei); const l = myActs(); l.push(aid); store.set("cc_acts_" + curId, JSON.stringify(l)); drawActs(); } catch {} finally { $("btnOpenAct").disabled = false; }
 };
+const gen = (b) => { const w = 10n ** 18n, i = b / w, f = (b % w).toString().padStart(18, "0").replace(/0+$/, ""); return i + (f ? "." + f.slice(0, 9) : "") + " GEN"; };
+const bigOf = (raw, k) => { const m = raw.match(new RegExp('"' + k + '": (\\d+)')); return m ? BigInt(m[1]) : 0n; }; // exact: JSON.parse would round amounts above ~0.009 GEN
 async function drawActs() {
-  const ids = myActs(); $("acts").innerHTML = ids.length ? '<label>Your escrows on this inquiry</label>' : "";
+  const ids = myActs(); const box = $("acts"); const mine = curId;
+  const out = [];
   for (const id of ids) {
     const raw = await call("get_action", [id]).catch(() => ""); if (!raw) continue; const a = JSON.parse(raw);
-    const pct = cur.record ? C.releaseFraction(cur.record.props, a.req_props, a.req_wants, a.min_clarity) : 0;
+    const pct = cur && cur.record ? C.releaseFraction(cur.record.props, a.req_props, a.req_wants, a.min_clarity) : 0;
     const el = document.createElement("div"); el.className = "act";
-    el.innerHTML = `<b>${esc(id)}</b> · ${a.status} · escrow ${a.escrow} wei · paid ${a.paid} · justified now ${pct}% <div class="row" style="margin-top:8px"><button data-x="execute_action">Execute release</button><button data-x="close_action">Close &amp; refund remainder</button></div>`;
+    const open = a.status === "OPEN";
+    el.innerHTML = `<b>${esc(id)}</b> · ${esc(a.status)} · locked ${gen(bigOf(raw, "escrow"))} · paid ${gen(bigOf(raw, "paid"))} · justified now ${pct}%${open ? ` <div class="row" style="margin-top:8px"><button data-x="execute_action">Execute release</button><button data-x="close_action">Close &amp; refund remainder</button></div>` : ""}`;
     el.querySelectorAll("button").forEach((b) => b.onclick = async () => { try { await tx(b.textContent, b.dataset.x, [id]); await renderDetail(false); } catch {} });
-    $("acts").appendChild(el);
+    out.push(el);
   }
+  if (mine !== curId) return; // user navigated away while loading
+  box.innerHTML = out.length ? '<label>Your escrows on this inquiry</label>' : ""; out.forEach((el) => box.appendChild(el));
 }
 
-/* ---------- motion: staggered reveals ---------- */
+/* ---------- motion: entrances (content never depends on them to be visible) ---------- */
 document.documentElement.classList.add("js");
-const reveal = [...document.querySelectorAll(".hero>*, .card")];
-reveal.forEach((e, i) => { e.classList.add("reveal"); e.style.setProperty("--d", (Math.min(i % 5, 4) * 0.07).toFixed(2) + "s"); });
-const io = "IntersectionObserver" in window ? new IntersectionObserver((en) => en.forEach((x) => { if (x.isIntersecting) { x.target.classList.add("in"); io.unobserve(x.target); } }), { threshold: 0.05 }) : null;
-reveal.forEach((e) => io ? io.observe(e) : e.classList.add("in"));
+(function () {
+  const els = [...document.querySelectorAll(".hero>*, .card")], vh = window.innerHeight || 800, below = [];
+  els.forEach((e, i) => {
+    if (e.hidden || e.closest("[hidden]")) return; // revealed later by the app, no entrance needed
+    if (e.getBoundingClientRect().top < vh * 0.95) { e.classList.add("rise"); e.style.setProperty("--d", (Math.min(i, 6) * 0.07).toFixed(2) + "s"); }
+    else { e.classList.add("reveal"); below.push(e); }
+  });
+  const show = (e) => e.classList.add("in");
+  if (!("IntersectionObserver" in window)) { below.forEach(show); return; }
+  let alive = false;
+  const io = new IntersectionObserver((en) => { alive = true; en.forEach((x) => { if (x.isIntersecting) { show(x.target); io.unobserve(x.target); } }); }, { threshold: 0.05 });
+  below.forEach((e) => io.observe(e));
+  setTimeout(() => { if (!alive) below.forEach(show); }, 2500); // observer never reported (hidden/emulated pane, preview bots): show everything
+})();
 
 /* ---------- boot ---------- */
 (async () => {

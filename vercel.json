@@ -4,5 +4,11 @@
   "installCommand": null,
   "buildCommand": null,
   "outputDirectory": "web",
-  "cleanUrls": true
+  "cleanUrls": false,
+  "rewrites": [
+    {
+      "source": "/app",
+      "destination": "/app.html"
+    }
+  ]
 }
