@@ -5,10 +5,11 @@
   "buildCommand": null,
   "outputDirectory": "web",
   "cleanUrls": false,
-  "rewrites": [
+  "redirects": [
     {
       "source": "/app",
-      "destination": "/app.html"
+      "destination": "/app.html",
+      "permanent": false
     }
   ]
 }
