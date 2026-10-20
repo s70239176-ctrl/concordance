@@ -40,15 +40,15 @@ https://github.com/s70239176-ctrl/concordance/releases/tag/v4-film
 ## Contracts
 
 - Network: GenLayer Studio
-- Concordance (oracle): `0x1e7d9A797860faCF5e993AFF715DD2C5d4B1f237`
-- ConcordanceGate (consumer): `0x620ec49c91469A2fa7Fa0d08bD009d99CCBd6287`
+- Concordance (oracle): [`0x1e7d9A797860faCF5e993AFF715DD2C5d4B1f237`](https://explorer-studionet.genlayer.com/address/0x1e7d9A797860faCF5e993AFF715DD2C5d4B1f237)
+- ConcordanceGate (consumer): [`0x620ec49c91469A2fa7Fa0d08bD009d99CCBd6287`](https://explorer-studionet.genlayer.com/address/0x620ec49c91469A2fa7Fa0d08bD009d99CCBd6287)
 
 ## Real transactions
 
 | | |
 |---|---|
-| Ruling on prop 6 (anchorage hold is not a "port closure") → DOES_NOT_HOLD, one consensus round | `0xe47d6742960f05c39799f85aa6ba3d80725b645d14226003fad8948d82a087d5` |
-| Gate claim after rulings: cross-contract read, paid 100% of the policy | `0x48103ac4a6cd005672013bd8e7d59c1119f485e4d42811723b89c0611d87678d` |
+| Ruling on prop 6 (anchorage hold is not a "port closure") → DOES_NOT_HOLD, one consensus round | [`0xe47d6742960f05c39799f85aa6ba3d80725b645d14226003fad8948d82a087d5`](https://explorer-studionet.genlayer.com/tx/0xe47d6742960f05c39799f85aa6ba3d80725b645d14226003fad8948d82a087d5) |
+| Gate claim after rulings: cross-contract read, paid 100% of the policy | [`0x48103ac4a6cd005672013bd8e7d59c1119f485e4d42811723b89c0611d87678d`](https://explorer-studionet.genlayer.com/tx/0x48103ac4a6cd005672013bd8e7d59c1119f485e4d42811723b89c0611d87678d) |
 
 Full measurements and the remaining transactions are in `docs/` and `scripts/*.json`.
 
