@@ -8,6 +8,12 @@ Open `web/index.html` (or `cd web && python -m http.server 8791`) for the intera
 75-second tour** for a guided walk-through of the scripted story, fragility, a ruling and the gate, the greybox
 attack, and the real Studio validators (Pause / Stop / Esc work; a full run measured 73 s).
 
+## Film and article
+- **90-second demo film** with captions and callouts: `video/concordance-demo.mp4` (captions also as `.srt` / `.vtt`).
+  It is computed from the product's own derivation code and recorded Studio results, and its soundtrack is
+  *sonified ambiguity*: the harmony clashes while the index is high and resolves when a ruling lands. See `video/README.md`.
+- **Article** (Medium-style, with figures): `docs/ARTICLE.md`.
+
 ## What v4 adds
 | Feature | What it does | Measured on Studio |
 |---|---|---|

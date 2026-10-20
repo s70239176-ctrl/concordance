@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Concordance: 90-second film</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..600&family=Instrument+Sans:wght@400..700&family=JetBrains+Mono:wght@400..700&display=swap">
+<style>
+:root{--ink:#0d0e11;--ink2:#13151a;--ink3:#1a1d24;--rule:#272a33;--rule2:#3b3f4b;--paper:#ece6d8;--muted:#a8a395;--faint:#6e6a60;
+ --affirm:#4cc9c0;--deny:#ff7a59;--agreed:#8fd19e;--brass:#e0b040;--hot:#ff5d4d;--ash:#77736a;
+ --serif:"Fraunces",Georgia,serif;--sans:"Instrument Sans",system-ui,sans-serif;--mono:"JetBrains Mono",Consolas,monospace}
+*{box-sizing:border-box}
+html,body{margin:0;background:#000;overflow:hidden}
+#stage{position:relative;width:1280px;height:720px;overflow:hidden;color:var(--paper);font-family:var(--sans);
+ background:radial-gradient(900px 500px at 8% -8%,rgba(224,176,64,.08),transparent 60%),
+ linear-gradient(rgba(236,230,216,.028) 1px,transparent 1px) 0 0/36px 36px,linear-gradient(90deg,rgba(236,230,216,.028) 1px,transparent 1px) 0 0/36px 36px,var(--ink)}
+#stage::after{content:"";position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 160px rgba(0,0,0,.55)}
+svg#g{position:absolute;inset:0;width:1280px;height:720px}
+svg text{font-family:var(--sans)}
+.abs{position:absolute}
+.card{position:absolute;border:1px solid var(--rule2);background:rgba(19,21,26,.94);border-top:3px solid var(--c,#888)}
+.card h3{margin:0;font:500 22px var(--serif)}
+.card .role{font:500 11px var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--faint);margin:2px 0 8px}
+.card p{margin:0;font:italic 400 17px/1.35 var(--serif);color:var(--muted)}
+#cap{position:absolute;left:150px;right:150px;bottom:20px;text-align:center;font:500 26px/1.28 var(--sans);letter-spacing:-.005em;padding:10px 22px;
+ background:rgba(13,14,17,.82);border-left:3px solid var(--brass);border-right:3px solid var(--brass);text-shadow:0 2px 12px #000}
+#cap b{color:var(--brass);font-weight:700}
+.co{position:absolute;font:500 14px/1.4 var(--mono);color:#16120a;background:var(--brass);padding:7px 11px;max-width:280px;letter-spacing:.01em}
+.co.dark{background:var(--ink3);color:var(--paper);border:1px solid var(--brass)}
+.chip{position:absolute;font:600 12px var(--mono);letter-spacing:.16em;text-transform:uppercase}
+#hdr{position:absolute;left:0;right:0;top:0;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 40px;border-bottom:1px solid var(--rule2);background:rgba(13,14,17,.7)}
+#hdr .brand{font:600 14px var(--mono);letter-spacing:.32em}
+#hdr .scene{font:500 12px var(--mono);letter-spacing:.2em;color:var(--brass);text-transform:uppercase}
+.big{position:absolute;font:300 120px/1 var(--serif);letter-spacing:-.03em;font-variant-numeric:lining-nums}
+.kick{position:absolute;font:500 13px var(--mono);letter-spacing:.24em;text-transform:uppercase;color:var(--brass)}
+.serif{font-family:var(--serif)}
+.mono{font-family:var(--mono)}
+.clause{position:absolute;font:400 15.5px/1.6 var(--mono);color:var(--muted);border:1px solid var(--rule2);background:rgba(19,21,26,.96);padding:18px 20px;border-left:3px solid var(--brass)}
+.clause em{font-style:normal;color:var(--paper);background:rgba(224,176,64,.22);padding:0 2px}
+.stat{position:absolute;text-align:center}
+.stat b{display:block;font:300 96px/1 var(--serif);letter-spacing:-.03em}
+.stat span{display:block;font:500 13px/1.4 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-top:8px}
+</style>
+</head>
+<body>
+<div id="stage">
+  <svg id="g" viewBox="0 0 1280 720"></svg>
+  <div id="hdr"><span class="brand">&#9678;&nbsp; CONCORDANCE</span><span class="scene" id="sceneLbl"></span></div>
+  <div id="ui"></div>
+  <div id="cap"></div>
+</div>
+<script src="../web/derive.js"></script>
+<script src="../web/scenarios.js"></script>
+<script src="../web/real.js"></script>
+<script src="../web/rulings.js"></script>
+<script src="film.js"></script>
+</body>
+</html>

@@ -14,3 +14,10 @@ scripts/records*.json
 scripts/_cases.json
 tests/_cases.json
 _newlogic.json
+
+# video build artifacts (the final mp4 and caption files are committed)
+video/frames/
+video/chk/
+video/audio.wav
+video/_test.mp4
+video/render.log

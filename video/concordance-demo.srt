@@ -1,0 +1,68 @@
+1
+00:00:00,500 --> 00:00:04,300
+One shipment. Four parties. Four stories.
+
+2
+00:00:04,500 --> 00:00:09,000
+A normal oracle crushes them into one answer.
+
+3
+00:00:09,800 --> 00:00:14,000
+Concordance keeps the disagreement: what is settled, what is contested, and by how much.
+
+4
+00:00:14,300 --> 00:00:19,000
+Five validators, five different models, each read every account on their own.
+
+5
+00:00:19,400 --> 00:00:24,600
+They agree on a small, bounded record, the part that holds up on real validators.
+
+6
+00:00:25,400 --> 00:00:29,600
+It also says why parties differ.
+
+7
+00:00:29,900 --> 00:00:35,600
+Evidence can settle facts. No evidence settles meaning.
+
+8
+00:00:36,300 --> 00:00:41,400
+When the dispute is about meaning, ask the clause one narrow question.
+
+9
+00:00:41,800 --> 00:00:46,800
+Validators answer in one word. Consensus on one word is easy.
+
+10
+00:00:47,300 --> 00:00:51,600
+The record updates. Ambiguity 38 → 18.
+
+11
+00:00:52,400 --> 00:00:56,200
+Remove each party in turn.
+
+12
+00:00:56,500 --> 00:01:03,400
+Before money moves, see which single voice the verdict hangs on.
+
+13
+00:01:04,300 --> 00:01:08,400
+A second contract pays by the record.
+
+14
+00:01:08,800 --> 00:01:14,000
+43% now. The rest after the ruling. No intermediary.
+
+15
+00:01:14,300 --> 00:01:17,800
+The gate never changed. The oracle did.
+
+16
+00:01:18,300 --> 00:01:22,200
+We measured it. The first design failed on real validators.
+
+17
+00:01:22,400 --> 00:01:25,800
+So we redesigned it, and we say what is still open.
+
