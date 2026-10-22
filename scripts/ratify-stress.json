@@ -1,0 +1,174 @@
+{
+  "oracle": "0x34A00eC1275dE6A4FCE9050f82c787B9fC90Fff4",
+  "attempts": [
+    {
+      "id": "rate1-mvjp805f",
+      "prop": 0,
+      "leader": {
+        "status": "CONTESTED",
+        "lean": "FALSE",
+        "clarity": 20
+      },
+      "try": 1,
+      "result": "ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1",
+      "hash": "0xa37f5e9c723c9a5c3df8dfc96599edb6040916aab418453ba3c5565d4de95094",
+      "ratified": true,
+      "stored": {
+        "lean": "FALSE",
+        "clarity": 20
+      }
+    },
+    {
+      "id": "rate1-mvjp805f",
+      "prop": 1,
+      "leader": {
+        "status": "CONTESTED",
+        "lean": "FALSE",
+        "clarity": 20
+      },
+      "try": 1,
+      "result": "ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1",
+      "hash": "0x3f625706f623bbefd3a4b1b03934ed7f2479d9800d917fe97e1174363402be7a",
+      "ratified": false,
+      "stored": null
+    },
+    {
+      "id": "rate1-mvjp805f",
+      "prop": 1,
+      "leader": {
+        "status": "CONTESTED",
+        "lean": "FALSE",
+        "clarity": 20
+      },
+      "try": 2,
+      "result": "ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1",
+      "hash": "0x00f1c01e54d695f85726c2fb1884e37b7cc9c51a316c7c2cc44af9b327510523",
+      "ratified": true,
+      "stored": {
+        "lean": "FALSE",
+        "clarity": 20
+      }
+    },
+    {
+      "id": "rate1-mvjp805f",
+      "prop": 2,
+      "leader": {
+        "status": "CONTESTED",
+        "lean": "TRUE",
+        "clarity": 20
+      },
+      "try": 1,
+      "result": "ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1",
+      "hash": "0x65b9e3b9609c70c172f6799cf0220668cdd902abc67f51453e7b6db484191a41",
+      "ratified": true,
+      "stored": {
+        "lean": "TRUE",
+        "clarity": 20
+      }
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "rate0-mvjp6in6",
+      "record": [
+        {
+          "status": "CONTESTED",
+          "lean": "NONE",
+          "clarity": 0
+        },
+        {
+          "status": "CONTESTED",
+          "lean": "NONE",
+          "clarity": 0
+        },
+        {
+          "status": "CONTESTED",
+          "lean": "NONE",
+          "clarity": 0
+        },
+        {
+          "status": "CONTESTED",
+          "lean": "NONE",
+          "clarity": 0
+        }
+      ]
+    },
+    {
+      "id": "rate1-mvjp805f",
+      "record": [
+        {
+          "status": "CONTESTED",
+          "lean": "FALSE",
+          "clarity": 20
+        },
+        {
+          "status": "CONTESTED",
+          "lean": "FALSE",
+          "clarity": 20
+        },
+        {
+          "status": "CONTESTED",
+          "lean": "TRUE",
+          "clarity": 20
+        },
+        {
+          "status": "CONTESTED",
+          "lean": "NONE",
+          "clarity": 0
+        }
+      ]
+    },
+    {
+      "id": "rate2-mvjpcmd4",
+      "record": [
+        {
+          "status": "CONTESTED",
+          "lean": "NONE",
+          "clarity": 0
+        },
+        {
+          "status": "CONTESTED",
+          "lean": "NONE",
+          "clarity": 0
+        },
+        {
+          "status": "CONTESTED",
+          "lean": "NONE",
+          "clarity": 0
+        },
+        {
+          "status": "CONTESTED",
+          "lean": "NONE",
+          "clarity": 0
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "propositions": 3,
+    "ratifiedFirstTry": 2,
+    "ratifiedWithOneRetry": 3,
+    "byLeaderClass": {
+      "CONTESTED": {
+        "n": 3,
+        "first": 2,
+        "eventual": 3
+      }
+    }
+  },
+  "log": [
+    "scenario 0 rate0-mvjp6in6",
+    " convene ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1",
+    " leader record: 1:CONTESTED/NONE/0 2:CONTESTED/NONE/0 3:CONTESTED/NONE/0 4:CONTESTED/NONE/0 ambiguity 100",
+    "scenario 1 rate1-mvjp805f",
+    " convene ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1",
+    " leader record: 1:CONTESTED/FALSE/20 2:CONTESTED/FALSE/20 3:CONTESTED/TRUE/20 4:CONTESTED/NONE/0 ambiguity 85",
+    "  prop 1 CONTESTED/FALSE/20 try 1: ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1 -> RATIFIED FALSE 20",
+    "  prop 2 CONTESTED/FALSE/20 try 1: ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1 -> not ratified",
+    "  prop 2 CONTESTED/FALSE/20 try 2: ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1 -> RATIFIED FALSE 20",
+    "  prop 3 CONTESTED/TRUE/20 try 1: ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1 -> RATIFIED TRUE 20",
+    "scenario 2 rate2-mvjpcmd4",
+    " convene ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1",
+    " leader record: 1:CONTESTED/NONE/0 2:CONTESTED/NONE/0 3:CONTESTED/NONE/0 4:CONTESTED/NONE/0 ambiguity 100"
+  ]
+}

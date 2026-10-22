@@ -85,6 +85,36 @@ asymmetric accounts, `convene`, then `ratify_payout` on every proposition whose 
 - Small sample (one scenario family, 9 propositions). The earlier 32% figure came from comparing recorded model pairs; this
   is the real transaction path and looks better for agreed propositions, but it is not a precise rate.
 
+### Trying to provoke a failed ratification on Studio
+`scripts/ratify-stress.mjs` (log `scripts/ratify-stress.log`, data `scripts/ratify-stress.json`): three deliberately subjective
+inquiries (contractor quality, a used car, a tenancy), then `ratify_payout` on every proposition with a lean, retrying up to twice.
+Two of the three inquiries had no leaning proposition at all (all deadlocked, ambiguity 100); the third had three contested leans.
+
+- 4 `ratify_payout` transactions, **all `ACCEPTED / MAJORITY_AGREE` in one round. I did not observe a transaction fail to reach
+  consensus.** The failed-consensus path is therefore verified only by the local stub, not on Studio.
+- Of the 3 contested leans, 3 were eventually ratified with a lean at clarity floor 20 (two on the first try, one after a
+  retry whose first attempt stored "NONE, 0"). Contested leans can become payable, but only at a low clarity floor here, so
+  they pay a small share (20%). This corrects the "0 of 2 contested" reading above: with more samples the contested count is
+  3 of 5 ratified with a lean (all at floor 20).
+- Retrying can change the outcome, because each call is a fresh independent read.
+- One run hit a transient Studio RPC error (`<!DOCTYPE` instead of JSON) during gas estimation; the transaction still went through.
+
+### The app, driven end to end against Studio (burner key)
+`scripts/ui-test.py` drives `web/app.html` in a real browser against v5 on inquiry `rat-mvjogca9` (log `scripts/ui-test.log`,
+screenshot `scripts/ui-test.png`, no page errors):
+
+| UI step | Result |
+|---|---|
+| Payable outcomes panel | shows each proposition as ratified or "not ratified · pays nothing" |
+| Click **Ratify** on proposition 3 | accepted in one round (32 s); panel updates |
+| Lock escrow on proposition 3 (no committed text) | card shows "justified now 100%" |
+| **Execute release** | accepted; card shows paid 0.001 GEN |
+| Lock escrow on prop 1 committed to the real clause | card shows 100% (a ruling on exactly that text exists) |
+| Lock escrow on prop 1 committed to different text | card shows **0%**; Execute is rejected by the contract |
+
+Not covered: the browser-wallet (MetaMask) path was not exercised for these new calls, only the burner key. I did not click
+Execute on the second escrow, only observed its 100% preview.
+
 ## The honest cost: ratification can fail
 
 On the real multi-model records in `tests/fixtures`, a single proposition's lean and clarity floor matched between two

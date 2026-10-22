@@ -1,0 +1,35 @@
+scenario 0 rate0-mvjp6in6
+ convene ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1
+ leader record: 1:CONTESTED/NONE/0 2:CONTESTED/NONE/0 3:CONTESTED/NONE/0 4:CONTESTED/NONE/0 ambiguity 100
+scenario 1 rate1-mvjp805f
+ convene ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1
+ leader record: 1:CONTESTED/FALSE/20 2:CONTESTED/FALSE/20 3:CONTESTED/TRUE/20 4:CONTESTED/NONE/0 ambiguity 85
+  prop 1 CONTESTED/FALSE/20 try 1: ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1 -> RATIFIED FALSE 20
+  prop 2 CONTESTED/FALSE/20 try 1: ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1 -> not ratified
+  prop 2 CONTESTED/FALSE/20 try 2: ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1 -> RATIFIED FALSE 20
+  prop 3 CONTESTED/TRUE/20 try 1: ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1 -> RATIFIED TRUE 20
+scenario 2 rate2-mvjpcmd4
+GenLayer RPC error (eth_estimateGas): Unexpected token '<', "<!DOCTYPE "... is not valid JSON
+Gas estimation failed, using default 200_000: UnknownRpcError: An unknown RPC error occurred.
+
+Details: Unexpected token '<', "<!DOCTYPE "... is not valid JSON
+Version: viem@2.57.7
+    at withRetry.delay.count.count (file:///C:/Users/User/Documents/Projects/New%20folder/concordance/node_modules/viem/_esm/utils/buildRequest.js:127:31)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async attemptRetry (file:///C:/Users/User/Documents/Projects/New%20folder/concordance/node_modules/viem/_esm/utils/promise/withRetry.js:24:30) {
+  details: `Unexpected token '<', "<!DOCTYPE "... is not valid JSON`,
+  docsPath: undefined,
+  metaMessages: undefined,
+  shortMessage: 'An unknown RPC error occurred.',
+  version: '2.57.7',
+  code: -1,
+  [cause]: SyntaxError: Unexpected token '<', "<!DOCTYPE "... is not valid JSON
+      at JSON.parse (<anonymous>)
+      at parseJSONFromBytes (node:internal/deps/undici/undici:4255:19)
+      at successSteps (node:internal/deps/undici/undici:6902:27)
+      at readAllBytes (node:internal/deps/undici/undici:5825:13)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+}
+ convene ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1
+ leader record: 1:CONTESTED/NONE/0 2:CONTESTED/NONE/0 3:CONTESTED/NONE/0 4:CONTESTED/NONE/0 ambiguity 100
+SUMMARY {"propositions":3,"ratifiedFirstTry":2,"ratifiedWithOneRetry":3,"byLeaderClass":{"CONTESTED":{"n":3,"first":2,"eventual":3}}}

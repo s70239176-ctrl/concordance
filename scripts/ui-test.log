@@ -1,0 +1,20 @@
+  [faucet] TIMEOUT Added test GEN to 0x0D9D5A…
+payable outcomes panel: PAYABLE OUTCOMES (RATIFIED BY VALIDATORS THIS ROUND) | 1. An anchorage hold counts as a 'port closure' under clause 14.2. | NOT RATIFIED · PAYS NOTHING | 2. Clause 14.2 requires a formal order from the harbour master or port authority for a port closure. | NOT RATIFIED · PAYS NOTHING | 3. The vessel
+  [ratify prop 3 (UI)] Ratify payout done (ACCEPTED · MAJORITY_AGREE · 1 consensus round, 32s).
+after ratify: ['PAYABLE OUTCOMES (RATIFIED BY VALIDATORS THIS ROUND)', 'NOT RATIFIED · PAYS NOTHING', 'NOT RATIFIED · PAYS NOTHING', '3. The vessel waited at anchor for more than forty hours.']
+A) escrow on prop 3 (ratified, TRUE), no committed text
+  [lock A] Lock escrow done (ACCEPTED · MAJORITY_AGREE · 1 consensus round, 11s).
+  card: act-y16sl0 · OPEN · locked 0.001 GEN · paid 0 GEN · justified now 100% EXECUTE RELEASE CLOSE & REFUND REMAINDER
+  A card before: act-y16sl0 · OPEN · locked 0.001 GEN · paid 0 GEN · justified now 100% EXECUTE RELEASE CLOSE & REFUND REMAINDER
+  [A execute] Execute release done (ACCEPTED · MAJORITY_AGREE · 1 consensus round, 16s).
+  after: YOUR ESCROWS ON THIS INQUIRY act-y16sl0 · OPEN · locked 0.001 GEN · paid 0 GEN · justified now 100% EXECUTE RELEASE CLOSE & REFUND REMAINDER
+B) escrow on prop 1 (must be FALSE), committed to the real clause
+  [lock B] Lock escrow done (ACCEPTED · MAJORITY_AGREE · 1 consensus round, 10s).
+  card: act-z4wpo8 · OPEN · locked 0.001 GEN · paid 0 GEN · justified now 100% EXECUTE RELEASE CLOSE & REFUND REMAINDER
+C) escrow on prop 1 (must be FALSE), committed to DIFFERENT text
+  [lock C] Lock escrow done (ACCEPTED · MAJORITY_AGREE · 1 consensus round, 13s).
+  card: act-ii935e · OPEN · locked 0.001 GEN · paid 0 GEN · justified now 0% EXECUTE RELEASE CLOSE & REFUND REMAINDER
+  C card before: act-ii935e · OPEN · locked 0.001 GEN · paid 0 GEN · justified now 0% EXECUTE RELEASE CLOSE & REFUND REMAINDER
+  [C execute] Execute release: the contract rejected this call (a rule was not met, e.g. permissions, limits or state).
+final acts panel: YOUR ESCROWS ON THIS INQUIRY act-y16sl0 · OPEN · locked 0.001 GEN · paid 0.001 GEN · justified now 100% EXECUTE RELEASE CLOSE & REFUND REMAINDER act-z4wpo8 · OPEN · locked 0.001 GEN · paid 0 GEN · justified now 100% EXECUTE RELEASE CLOSE & REFUND REMAINDER act-ii935e · OPEN · locked 0.001 GEN · paid 0 GEN · justified now 0% EXECUTE RELEASE CLOSE & REFUND REMAINDER
+page errors: []
