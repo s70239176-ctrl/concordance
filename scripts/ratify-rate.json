@@ -1,0 +1,311 @@
+{
+  "oracle": "0x34A00eC1275dE6A4FCE9050f82c787B9fC90Fff4",
+  "attempts": [
+    {
+      "id": "rate0-mvjoo6iz",
+      "prop": 0,
+      "leader": {
+        "status": "AGREED_TRUE",
+        "lean": "TRUE",
+        "clarity": 100
+      },
+      "try": 1,
+      "result": "ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1",
+      "hash": "0x0b86b03b8305a10b9f18c3638fa9fd009490f760c3f46b29af7d088bc462cd4f",
+      "ratified": true,
+      "stored": {
+        "lean": "TRUE",
+        "clarity": 100
+      },
+      "ratified_with_lean": true
+    },
+    {
+      "id": "rate0-mvjoo6iz",
+      "prop": 1,
+      "leader": {
+        "status": "AGREED_TRUE",
+        "lean": "TRUE",
+        "clarity": 100
+      },
+      "try": 1,
+      "result": "ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1",
+      "hash": "0x44b35a73ea2b6278957ee2083b5640cb1d48335e4b8cdfea467fa5ed26187d53",
+      "ratified": true,
+      "stored": {
+        "lean": "TRUE",
+        "clarity": 100
+      },
+      "ratified_with_lean": true
+    },
+    {
+      "id": "rate0-mvjoo6iz",
+      "prop": 3,
+      "leader": {
+        "status": "AGREED_TRUE",
+        "lean": "TRUE",
+        "clarity": 100
+      },
+      "try": 1,
+      "result": "ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1",
+      "hash": "0xc1ed40334073cea714d8ed1bb616dbff7d296e3e8772ff3bce341f438d59b1a3",
+      "ratified": true,
+      "stored": {
+        "lean": "NONE",
+        "clarity": 0
+      },
+      "ratified_with_lean": false
+    },
+    {
+      "id": "rate1-mvjoqkir",
+      "prop": 0,
+      "leader": {
+        "status": "AGREED_TRUE",
+        "lean": "TRUE",
+        "clarity": 100
+      },
+      "try": 1,
+      "result": "ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1",
+      "hash": "0x3ed71484b8d2ded12a70f39eaa8ee9714b4b48be290493c16627e8c7189cf39e",
+      "ratified": true,
+      "stored": {
+        "lean": "TRUE",
+        "clarity": 100
+      },
+      "ratified_with_lean": true
+    },
+    {
+      "id": "rate1-mvjoqkir",
+      "prop": 3,
+      "leader": {
+        "status": "AGREED_TRUE",
+        "lean": "TRUE",
+        "clarity": 100
+      },
+      "try": 1,
+      "result": "ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1",
+      "hash": "0x6f0b2a1221a9fb5526a65eba0e07941c0ac8be08b0f7849dcdd8c46c8694aadb",
+      "ratified": true,
+      "stored": {
+        "lean": "TRUE",
+        "clarity": 100
+      },
+      "ratified_with_lean": true
+    },
+    {
+      "id": "rate2-mvjoskx6",
+      "prop": 1,
+      "leader": {
+        "status": "CONTESTED",
+        "lean": "TRUE",
+        "clarity": 20
+      },
+      "try": 1,
+      "result": "ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1",
+      "hash": "0x72d7cbfefc9857ad6d5a151ef2263d841490f0bb78ead09ad76eba1f77bd2553",
+      "ratified": true,
+      "stored": {
+        "lean": "NONE",
+        "clarity": 0
+      },
+      "ratified_with_lean": false
+    },
+    {
+      "id": "rate2-mvjoskx6",
+      "prop": 2,
+      "leader": {
+        "status": "CONTESTED",
+        "lean": "TRUE",
+        "clarity": 20
+      },
+      "try": 1,
+      "result": "ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1",
+      "hash": "0x13a7b9154f5da4a1de615506e18276724940f8428cbcc46284ed1d6e703bb31f",
+      "ratified": true,
+      "stored": {
+        "lean": "NONE",
+        "clarity": 0
+      },
+      "ratified_with_lean": false
+    },
+    {
+      "id": "rate2-mvjoskx6",
+      "prop": 3,
+      "leader": {
+        "status": "AGREED_TRUE",
+        "lean": "TRUE",
+        "clarity": 100
+      },
+      "try": 1,
+      "result": "ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1",
+      "hash": "0x8a196055e4bdb8801d36845855220e4800b0b0ff5efb5e0b8781c621305e4c65",
+      "ratified": true,
+      "stored": {
+        "lean": "TRUE",
+        "clarity": 100
+      },
+      "ratified_with_lean": true
+    },
+    {
+      "id": "rate3-mvjowlpo",
+      "prop": 2,
+      "leader": {
+        "status": "AGREED_TRUE",
+        "lean": "TRUE",
+        "clarity": 100
+      },
+      "try": 1,
+      "result": "ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1",
+      "hash": "0x4aa554f8ca918598b13bb5da08d6be94fcefe8ac1c881ca93b0983457c173aed",
+      "ratified": true,
+      "stored": {
+        "lean": "TRUE",
+        "clarity": 100
+      },
+      "ratified_with_lean": true
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "rate0-mvjoo6iz",
+      "record": [
+        {
+          "status": "AGREED_TRUE",
+          "lean": "TRUE",
+          "clarity": 100
+        },
+        {
+          "status": "AGREED_TRUE",
+          "lean": "TRUE",
+          "clarity": 100
+        },
+        {
+          "status": "UNSUPPORTED",
+          "lean": "NONE",
+          "clarity": 0
+        },
+        {
+          "status": "AGREED_TRUE",
+          "lean": "TRUE",
+          "clarity": 100
+        }
+      ]
+    },
+    {
+      "id": "rate1-mvjoqkir",
+      "record": [
+        {
+          "status": "AGREED_TRUE",
+          "lean": "TRUE",
+          "clarity": 100
+        },
+        {
+          "status": "UNSUPPORTED",
+          "lean": "NONE",
+          "clarity": 0
+        },
+        {
+          "status": "CONTESTED",
+          "lean": "NONE",
+          "clarity": 0
+        },
+        {
+          "status": "AGREED_TRUE",
+          "lean": "TRUE",
+          "clarity": 100
+        }
+      ]
+    },
+    {
+      "id": "rate2-mvjoskx6",
+      "record": [
+        {
+          "status": "UNSUPPORTED",
+          "lean": "NONE",
+          "clarity": 0
+        },
+        {
+          "status": "CONTESTED",
+          "lean": "TRUE",
+          "clarity": 20
+        },
+        {
+          "status": "CONTESTED",
+          "lean": "TRUE",
+          "clarity": 20
+        },
+        {
+          "status": "AGREED_TRUE",
+          "lean": "TRUE",
+          "clarity": 100
+        }
+      ]
+    },
+    {
+      "id": "rate3-mvjowlpo",
+      "record": [
+        {
+          "status": "CONTESTED",
+          "lean": "NONE",
+          "clarity": 0
+        },
+        {
+          "status": "CONTESTED",
+          "lean": "NONE",
+          "clarity": 0
+        },
+        {
+          "status": "AGREED_TRUE",
+          "lean": "TRUE",
+          "clarity": 100
+        },
+        {
+          "status": "UNSUPPORTED",
+          "lean": "NONE",
+          "clarity": 0
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "propositions": 9,
+    "ratified_with_lean_first_try": 6,
+    "byLeaderClass": {
+      "AGREED": {
+        "n": 7,
+        "ratified_with_lean": 6,
+        "ratified_as_nothing": 1,
+        "no_consensus": 0
+      },
+      "CONTESTED": {
+        "n": 2,
+        "ratified_with_lean": 0,
+        "ratified_as_nothing": 2,
+        "no_consensus": 0
+      }
+    },
+    "note": "corrected from the script's first summary, which counted a stored NONE/0 as a success"
+  },
+  "log": [
+    "scenario 0 rate0-mvjoo6iz",
+    " convene ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1",
+    " leader record: 1:AGREED_TRUE/TRUE/100 2:AGREED_TRUE/TRUE/100 3:UNSUPPORTED/NONE/0 4:AGREED_TRUE/TRUE/100 ambiguity 25",
+    "  prop 1 AGREED_TRUE/TRUE/100 try 1: ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1 -> RATIFIED TRUE 100",
+    "  prop 2 AGREED_TRUE/TRUE/100 try 1: ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1 -> RATIFIED TRUE 100",
+    "  prop 4 AGREED_TRUE/TRUE/100 try 1: ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1 -> RATIFIED NONE 0",
+    "scenario 1 rate1-mvjoqkir",
+    " convene ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1",
+    " leader record: 1:AGREED_TRUE/TRUE/100 2:UNSUPPORTED/NONE/0 3:CONTESTED/NONE/0 4:AGREED_TRUE/TRUE/100 ambiguity 50",
+    "  prop 1 AGREED_TRUE/TRUE/100 try 1: ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1 -> RATIFIED TRUE 100",
+    "  prop 4 AGREED_TRUE/TRUE/100 try 1: ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1 -> RATIFIED TRUE 100",
+    "scenario 2 rate2-mvjoskx6",
+    " convene ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1",
+    " leader record: 1:UNSUPPORTED/NONE/0 2:CONTESTED/TRUE/20 3:CONTESTED/TRUE/20 4:AGREED_TRUE/TRUE/100 ambiguity 65",
+    "  prop 2 CONTESTED/TRUE/20 try 1: ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1 -> RATIFIED NONE 0",
+    "  prop 3 CONTESTED/TRUE/20 try 1: ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1 -> RATIFIED NONE 0",
+    "  prop 4 AGREED_TRUE/TRUE/100 try 1: ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1 -> RATIFIED TRUE 100",
+    "scenario 3 rate3-mvjowlpo",
+    " convene ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1",
+    " leader record: 1:CONTESTED/NONE/0 2:CONTESTED/NONE/0 3:AGREED_TRUE/TRUE/100 4:UNSUPPORTED/NONE/0 ambiguity 75",
+    "  prop 3 AGREED_TRUE/TRUE/100 try 1: ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1 -> RATIFIED TRUE 100"
+  ]
+}

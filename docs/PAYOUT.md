@@ -67,6 +67,24 @@ hit a transient Studio RPC error before any transaction; the run reported here i
 One scenario, one run. It shows the mechanism works end to end on Studio (including `hashlib` inside the contract), not how
 often real validators will ratify.
 
+### Repeated measurement (4 inquiries, 9 leaning propositions)
+`scripts/ratify-rate.mjs`; data in `scripts/ratify-rate.json`, log in `scripts/ratify-rate.log`. Four fresh inquiries with
+asymmetric accounts, `convene`, then `ratify_payout` on every proposition whose convene record had a lean.
+
+| Leader class at convene | Propositions | Ratified with a lean | Ratified as nothing (NONE, 0) | No consensus |
+|---|---|---|---|---|
+| AGREED | 7 | 6 | 1 | 0 |
+| CONTESTED (leaned TRUE, clarity 20) | 2 | 0 | 2 | 0 |
+
+- All 9 transactions were `ACCEPTED / MAJORITY_AGREE` in one round; none needed a retry.
+- The mechanism fails safe in a way I did not predict. `ratify_payout` makes a fresh leader read, and in 3 of 9 cases that read
+  produced no lean, so what was stored is lean NONE, clarity 0: ratified, but it pays nothing. Both contested propositions
+  ended this way. So the failure shows up as "ratified as nothing", not as a failed transaction.
+- Net: **6 of 9 leaning propositions became payable (6 of 7 agreed, 0 of 2 contested).** Contested leans did not become
+  payable here, which is the steward's intent, but it means graded release on a contested proposition now needs a ruling.
+- Small sample (one scenario family, 9 propositions). The earlier 32% figure came from comparing recorded model pairs; this
+  is the real transaction path and looks better for agreed propositions, but it is not a precise rate.
+
 ## The honest cost: ratification can fail
 
 On the real multi-model records in `tests/fixtures`, a single proposition's lean and clarity floor matched between two
