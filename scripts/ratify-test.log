@@ -1,0 +1,14 @@
+inquiry rat-mvjogca9 | oracle 0x34A00eC1275dE6A4FCE9050f82c787B9fC90Fff4 | gate 0xBd223ab2018b71d85aD8299bF97192C9b5f930B6
+convene -> ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1
+leader record: 1:CONTESTED/NONE/0 2:CONTESTED/NONE/0 3:AGREED_TRUE/TRUE/100 ambiguity 67
+open_policy (no committed text) -> ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1
+claim BEFORE ratification (must be refused) -> ACCEPTED/MAJORITY_AGREE exec=ERROR rounds=1
+ratify_payout prop 3 -> ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1
+signal after ratify attempt: {"status":"RATIFIED","lean":"TRUE","clarity":100,"weight":5,"ruled":false,"round":1}
+claim AFTER ratification -> ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1
+open_policy (committed to the real clause) -> ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1
+ruling on SUBSTITUTED text -> ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1
+claim after substituted ruling (must be refused unless ratified separately) -> ACCEPTED/MAJORITY_AGREE exec=ERROR rounds=1
+ruling on the COMMITTED text -> ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1
+claim after the committed-text ruling -> ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1
+done

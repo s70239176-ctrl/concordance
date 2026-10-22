@@ -17,13 +17,14 @@ attack, and the real Studio validators (Pause / Stop / Esc work; a full run meas
 ## What v4 adds
 | Feature | What it does | Measured on Studio |
 |---|---|---|
-| **Rulings** | When a dispute is about *meaning*, `request_ruling` asks validators one narrow question against the governing text (`HOLDS` / `DOES_NOT_HOLD` / `UNDETERMINED`). A ruling settles that proposition in the *effective* record, so it moves money | 10 of 10 rulings accepted in a single consensus round, with the intended verdicts (`docs/RULING.md`) |
+| **Rulings** | When a dispute is about *meaning*, `request_ruling` asks validators one narrow question against the governing text (`HOLDS` / `DOES_NOT_HOLD` / `UNDETERMINED`). A ruling can move money only for an escrow or gate policy that committed to the exact governing text when it was funded (`docs/PAYOUT.md`) | 10 of 10 rulings accepted in a single consensus round, with the intended verdicts (`docs/RULING.md`) |
 | **Fragility map** | Removes each party in turn and re-derives: which single voice holds the verdict up. Computed from the stored record, no model call | parity-tested on all 24 real model records |
 | **ConcordanceGate** | A *separate* contract that reads the oracle across contracts and pays by it (`docs/GATE.md`) | cross-contract read inside a write works; paid 100% off a ruling made in the other contract, refused a second claim and an unruled one |
 
-**Deployed on GenLayer Studio:** Concordance v4 `0x1e7d9A797860faCF5e993AFF715DD2C5d4B1f237`, ConcordanceGate
-`0x620ec49c91469A2fa7Fa0d08bD009d99CCBd6287` (v3 `0x58E8b84B0b55e9d4d33e5E973CF41D475919ECc7` is kept for the recorded
-history the demo replays). The live app defaults to v4 and the gate.
+**Deployed on GenLayer Studio (v5, current):** Concordance `0x34A00eC1275dE6A4FCE9050f82c787B9fC90Fff4`, ConcordanceGate
+`0xBd223ab2018b71d85aD8299bF97192C9b5f930B6`. v5 is the steward-review fix: money moves only on outcomes validators explicitly ratify and on
+rulings made against a text committed at funding (`docs/PAYOUT.md`). The earlier v4 (`0x1e7d9A797860faCF5e993AFF715DD2C5d4B1f237`, gate `0x620ec49c91469A2fa7Fa0d08bD009d99CCBd6287`) and v3
+(`0x58E8b84B0b55e9d4d33e5E973CF41D475919ECc7`) are kept for the recorded history the demo replays. The live app defaults to v5.
 
 **Biggest known gap in rulings:** the requester supplies the governing text and a final ruling cannot be redone. The
 text is stored and shown next to the ruling, but binding it when the inquiry is opened is still to do. Read

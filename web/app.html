@@ -75,7 +75,7 @@
 
     <div class="card" id="cRuling" hidden>
       <h2><span class="no">&#9878;</span>Rulings</h2>
-      <p class="sub">Where evidence cannot settle a dispute, ask validators one narrow question: does the proposition hold as a matter of what a clause, policy or rule says? Consensus ratifies only HOLDS, DOES NOT HOLD or UNDETERMINED. A ruling settles that proposition; the stored record is never modified.</p>
+      <p class="sub">Where evidence cannot settle a dispute, ask validators one narrow question: does the proposition hold as a matter of what a clause, policy or rule says? Consensus ratifies only HOLDS, DOES NOT HOLD or UNDETERMINED. A ruling is stored against the hash of the exact text you give. It can release escrow only for an escrow or gate policy that committed to that same text when it was funded; a ruling on any other text is ignored for payouts. The stored record is never modified.</p>
       <div id="rulingList"></div>
       <div id="rulingForm">
         <label for="rProp">Contested proposition</label><select id="rProp"></select>
@@ -100,12 +100,14 @@
 
     <div class="card" id="cEscrow" hidden>
       <h2><span class="no">03</span>Ambiguity-priced escrow</h2>
-      <p class="sub">Lock funds that release in proportion to how settled the required propositions are. Releases only ratchet up; the funder reclaims the rest once the inquiry is closed.</p>
+      <p class="sub">Lock funds that release in proportion to how settled the required propositions are. Only outcomes that validators have explicitly <b>ratified</b> can release money; the leader&rsquo;s annotated map never does. Releases only ratchet up; the funder reclaims the rest once the inquiry is closed.</p>
+      <div id="ratBody"></div>
       <p class="small" id="escClosed" hidden>This inquiry is closed, so no new escrow can be locked. Existing escrows can still be closed to refund what is unspent.</p>
       <div id="escForm">
       <div id="reqs"></div>
       <div class="two"><div><label for="eBen">Beneficiary address</label><input id="eBen" placeholder="0x..."></div><div><label for="eVal">Amount (GEN)</label><input id="eVal" value="0.001" inputmode="decimal"></div></div>
       <div class="two"><div><label for="eMin">Minimum clarity per requirement (0&ndash;100)</label><input id="eMin" value="0" inputmode="numeric"></div><div></div></div>
+      <label for="eSrc">Governing text a ruling may use (optional, committed now)</label><textarea id="eSrc" maxlength="1500" placeholder="Leave empty and no ruling can ever release this money. If you paste a clause, only a ruling made on exactly this text counts; any other text is ignored."></textarea>
       <div class="row" style="margin-top:12px"><button class="primary" id="btnOpenAct">Lock escrow</button><button id="btnOpenPol" hidden title="A separate contract, ConcordanceGate, reads this oracle and pays by it">Lock as gate policy</button><span class="small" id="relPrev"></span></div>
       </div>
       <div id="pols"></div>
@@ -123,8 +125,8 @@ import { createClient, createAccount, generatePrivateKey } from "https://esm.sh/
 import { studionet } from "https://esm.sh/genlayer-js@1.1.8/chains";
 
 const C = window.Concordance;
-const DEFAULT_CONTRACT = "0x1e7d9A797860faCF5e993AFF715DD2C5d4B1f237"; // Concordance v4 (rulings, fragility)
-const DEFAULT_GATE = "0x620ec49c91469A2fa7Fa0d08bD009d99CCBd6287"; // ConcordanceGate, a separate consumer contract
+const DEFAULT_CONTRACT = "0x34A00eC1275dE6A4FCE9050f82c787B9fC90Fff4"; // Concordance v5 (payouts only on validator-ratified outcomes and committed texts)
+const DEFAULT_GATE = "0xBd223ab2018b71d85aD8299bF97192C9b5f930B6"; // ConcordanceGate, a separate consumer contract
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -299,10 +301,11 @@ async function renderDetail(fresh) {
   if (!raw) { cur = null; $("dQ").textContent = "Inquiry not found"; $("dMeta").textContent = "There is no inquiry with this id on this contract. Check the link, or go back to the list."; $("dStatus").textContent = ""; $("dBody").hidden = true; return; }
   $("dBody").hidden = false;
   cur = JSON.parse(raw);
-  cur.eff = null; cur.rulings = [];
+  cur.eff = null; cur.rulings = []; cur.ratified = null;
   if (cur.record) { // v4+: the record with rulings applied, and the rulings themselves (older contracts just lack these views)
     const [eff, rl] = await Promise.all([call("get_effective_record", [curId]).catch(() => ""), call("get_rulings", [curId]).catch(() => "")]);
     cur.eff = eff ? JSON.parse(eff) : cur.record; cur.rulings = rl ? JSON.parse(rl) : [];
+    const rt = await call("get_ratified", [curId]).catch(() => ""); cur.ratified = rt ? JSON.parse(rt) : null; // v5: what may move money
   }
   $("dQ").textContent = cur.question;
   $("dStatus").textContent = cur.status; $("dStatus").className = "pill " + (cur.status === "CLOSED" ? "closed" : "open");
@@ -390,14 +393,28 @@ function renderEscrow() {
     $("reqs").dataset.for = curId;
     $("reqs").innerHTML = '<label>Required propositions (what must be true for funds to release)</label>' + cur.props.map((p, i) => `<div class="row" style="margin:6px 0"><select data-i="${i}" aria-label="Requirement ${i + 1}" style="width:130px"><option value="">not required</option><option value="TRUE">must be TRUE</option><option value="FALSE">must be FALSE</option></select><span class="small">${i + 1}. ${esc(p.text)}</span></div>`).join("");
   }
-  previewRelease(); drawActs(); drawPols();
+  renderRatify(); previewRelease(); drawActs(); drawPols();
+}
+function renderRatify() {
+  const rt = cur.ratified; if (!rt) { $("ratBody").innerHTML = ""; return; }
+  $("ratBody").innerHTML = '<label>Payable outcomes (ratified by validators this round)</label>' + cur.record.props.map((lp) => {
+    const sg = rt[lp.index], ok = sg.status === "RATIFIED";
+    const can = lp.lean !== "NONE" && lp.status !== "UNSUPPORTED" && cur.status !== "CLOSED";
+    return `<div class="row" style="margin:6px 0;gap:10px"><span class="small" style="flex:1">${lp.index + 1}. ${esc(cur.props[lp.index].text)}</span><span class="tag ${ok ? "fix" : ""}">${ok ? "ratified · " + sg.lean + " · clarity " + sg.clarity : "not ratified · pays nothing"}</span>${can ? `<button data-ratify="${lp.index}">${ok ? "Re-ratify" : "Ratify"}</button>` : ""}</div>`;
+  }).join("") + '<div class="small" style="margin-bottom:10px">Ratifying asks validators to re-read the accounts independently. It succeeds only if they lean the same way and are at least as clear as the leader&rsquo;s floor; if they disagree, nothing is stored and no money can move.</div>';
+  $("ratBody").querySelectorAll("[data-ratify]").forEach((b) => b.onclick = async () => { try { b.disabled = true; await tx("Ratify payout", "ratify_payout", [curId, +b.dataset.ratify]); await renderDetail(false); } catch {} finally { b.disabled = false; } });
+}
+async function livePct(a, getter, hashes) { // what a funded action/policy would release right now: ratified outcomes, or a ruling on its committed text
+  if (!cur || !cur.record) return 0;
+  const sigs = await Promise.all(a.req_props.map((i, k) => call("get_signal", [curId, i, (hashes || [])[k] || ""]).then((r) => (r ? JSON.parse(r) : { weight: 1, lean: "NONE", clarity: 0 })).catch(() => ({ weight: 1, lean: "NONE", clarity: 0 }))));
+  return C.releaseFraction(sigs, sigs.map((_, k) => k), a.req_wants, a.min_clarity);
 }
 $("reqs").addEventListener("change", () => { if (cur) previewRelease(); });
 function readReqs() { const rp = [], rw = []; document.querySelectorAll("#reqs select").forEach((s) => { if (s.value) { rp.push(+s.dataset.i); rw.push(s.value); } }); return { rp, rw }; }
 function previewRelease() {
   const { rp, rw } = readReqs(); if (!cur || !cur.record || !rp.length) { $("relPrev").textContent = ""; return; }
-  const pct = C.releaseFraction((cur.eff || cur.record).props, rp, rw, parseInt($("eMin").value, 10) || 0);
-  $("relPrev").textContent = `On the current record, ${pct}% would be releasable now.`;
+  const pct = cur.ratified ? C.releaseFraction(cur.ratified, rp, rw, parseInt($("eMin").value, 10) || 0) : 0;
+  $("relPrev").textContent = `On the ratified outcomes, ${pct}% would be releasable now.`;
 }
 $("eMin").addEventListener("input", () => { if (cur) previewRelease(); });
 const toWei = (s) => { const [a, b = ""] = String(s).trim().split("."); if (!/^\d+$/.test(a || "0") || !/^\d*$/.test(b)) throw new Error("bad amount"); return BigInt(a || "0") * 10n ** 18n + BigInt((b + "0".repeat(18)).slice(0, 18)); };
@@ -408,7 +425,7 @@ $("btnOpenAct").onclick = async () => {
   let wei; try { wei = toWei($("eVal").value); } catch { return say("Amount must be a number.", "warn"); }
   if (wei <= 0n) return say("Amount must be above zero.", "warn");
   const aid = "act-" + Math.random().toString(36).slice(2, 8);
-  try { $("btnOpenAct").disabled = true; await tx("Lock escrow", "open_action", [aid, curId, ben, rp, rw, parseInt($("eMin").value, 10) || 0], wei); const l = myActs(); l.push(aid); store.set("cc_acts_" + curId, JSON.stringify(l)); drawActs(); } catch {} finally { $("btnOpenAct").disabled = false; }
+  try { $("btnOpenAct").disabled = true; await tx("Lock escrow", "open_action", [aid, curId, ben, rp, rw, parseInt($("eMin").value, 10) || 0, rp.map(() => $("eSrc").value.trim())], wei); const l = myActs(); l.push(aid); store.set("cc_acts_" + curId, JSON.stringify(l)); drawActs(); } catch {} finally { $("btnOpenAct").disabled = false; }
 };
 const gen = (b) => { const w = 10n ** 18n, i = b / w, f = (b % w).toString().padStart(18, "0").replace(/0+$/, ""); return i + (f ? "." + f.slice(0, 9) : "") + " GEN"; };
 const bigOf = (raw, k) => { const m = raw.match(new RegExp('"' + k + '": (\\d+)')); return m ? BigInt(m[1]) : 0n; }; // exact: JSON.parse would round amounts above ~0.009 GEN
@@ -417,7 +434,7 @@ async function drawActs() {
   const out = [];
   for (const id of ids) {
     const raw = await call("get_action", [id]).catch(() => ""); if (!raw) continue; const a = JSON.parse(raw);
-    const pct = cur && cur.record ? C.releaseFraction((cur.eff || cur.record).props, a.req_props, a.req_wants, a.min_clarity) : 0;
+    const pct = await livePct(a, null, a.req_hashes);
     const el = document.createElement("div"); el.className = "act";
     const open = a.status === "OPEN";
     el.innerHTML = `<b>${esc(id)}</b> · ${esc(a.status)} · locked ${gen(bigOf(raw, "escrow"))} · paid ${gen(bigOf(raw, "paid"))} · justified now ${pct}%${open ? ` <div class="row" style="margin-top:8px"><button data-x="execute_action">Execute release</button><button data-x="close_action">Close &amp; refund remainder</button></div>` : ""}`;
@@ -438,14 +455,14 @@ $("btnOpenPol").onclick = async () => {
   let wei; try { wei = toWei($("eVal").value); } catch { return say("Amount must be a number.", "warn"); }
   if (wei <= 0n) return say("Amount must be above zero.", "warn");
   const pid = "pol-" + Math.random().toString(36).slice(2, 8);
-  try { $("btnOpenPol").disabled = true; await tx("Lock gate policy", "open_policy", [pid, curId, ben, rp, rw, parseInt($("eMin").value, 10) || 0], wei, GATE); const l = myPols(); l.push(pid); store.set("cc_pols_" + curId, JSON.stringify(l)); drawPols(); } catch {} finally { $("btnOpenPol").disabled = false; }
+  try { $("btnOpenPol").disabled = true; await tx("Lock gate policy", "open_policy", [pid, curId, ben, rp, rw, parseInt($("eMin").value, 10) || 0, rp.map(() => $("eSrc").value.trim())], wei, GATE); const l = myPols(); l.push(pid); store.set("cc_pols_" + curId, JSON.stringify(l)); drawPols(); } catch {} finally { $("btnOpenPol").disabled = false; }
 };
 async function drawPols() {
   const box = $("pols"); const mine = curId; const ids = myPols(); if (!gateOk || !ids.length) { box.innerHTML = ""; return; }
   const out = [];
   for (const id of ids) {
     const raw = await call("get_policy", [id], GATE).catch(() => ""); if (!raw) continue; const a = JSON.parse(raw);
-    const pct = cur && cur.record ? C.releaseFraction((cur.eff || cur.record).props, a.req_props, a.req_wants, a.min_clarity) : 0;
+    const pct = await livePct(a, null, a.req_hashes);
     const el = document.createElement("div"); el.className = "act";
     const open = a.status === "OPEN";
     el.innerHTML = `<b>${esc(id)}</b> · gate policy · ${esc(a.status)} · locked ${gen(bigOf(raw, "escrow"))} · paid ${gen(bigOf(raw, "paid"))} · the oracle justifies ${pct}% now${open ? ` <div class="row" style="margin-top:8px"><button data-x="claim">Claim (reads the oracle)</button><button data-x="refund">Refund remainder</button></div>` : ""}`;

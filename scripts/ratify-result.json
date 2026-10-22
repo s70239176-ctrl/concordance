@@ -1,0 +1,111 @@
+{
+  "inquiry": "rat-mvjogca9",
+  "oracle": "0x34A00eC1275dE6A4FCE9050f82c787B9fC90Fff4",
+  "gate": "0xBd223ab2018b71d85aD8299bF97192C9b5f930B6",
+  "steps": [
+    {
+      "name": "convene",
+      "result": "ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1",
+      "hash": "0x7ff424ffa3e60d33c18f22038b34d592dc1bb665d02c8ff7dd055d2e11ba72ed"
+    },
+    {
+      "name": "open_policy (no committed text)",
+      "result": "ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1",
+      "hash": "0xcf98a5dffbd78a7ac4214e66c3a1f09688d039ae5f0b2799596a5b84df75738e"
+    },
+    {
+      "name": "claim BEFORE ratification (must be refused)",
+      "result": "ACCEPTED/MAJORITY_AGREE exec=ERROR rounds=1",
+      "hash": "0xa6ee3b1984460d5adc88392b9a6765d198253edaf38b57911694b534114afb6f",
+      "paid": "0"
+    },
+    {
+      "name": "ratify_payout prop 3",
+      "result": "ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1",
+      "hash": "0x2c4e07ac8d103685d45fae756eda24773239d11bc9ed1c4364181ecd68524156"
+    },
+    {
+      "name": "claim AFTER ratification",
+      "result": "ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1",
+      "hash": "0x550a85761c6b948c74695aacbc854d446ebc42b5f1bdff0ee5c65650bfe4d889",
+      "paid": "1000000",
+      "signal": {
+        "status": "RATIFIED",
+        "lean": "TRUE",
+        "clarity": 100,
+        "weight": 5,
+        "ruled": false,
+        "round": 1
+      }
+    },
+    {
+      "name": "open_policy (committed to the real clause)",
+      "result": "ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1",
+      "hash": "0xc5790217f50710c607002f97a339474fa9094f7bdf237d0abd8a22a641d3857a"
+    },
+    {
+      "name": "ruling on SUBSTITUTED text",
+      "result": "ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1",
+      "hash": "0xfbd3c88bd2ffca67df10b94aa2ee0d7b93e4228c8c0f3167fdbacdc6b34a0986",
+      "verdict": "HOLDS"
+    },
+    {
+      "name": "claim after substituted ruling (must be refused unless ratified separately)",
+      "result": "ACCEPTED/MAJORITY_AGREE exec=ERROR rounds=1",
+      "hash": "0xafce812026af6b2254a3ab3b3dfe78f6b686d241381f6dacd11475078ca104d1",
+      "paid": "0"
+    },
+    {
+      "name": "ruling on the COMMITTED text",
+      "result": "ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1",
+      "hash": "0x5f482b0c13c5b3b96a5d829d00287468f80452e7089839c3c9fb7f058174775c"
+    },
+    {
+      "name": "claim after the committed-text ruling",
+      "result": "ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1",
+      "hash": "0x19ea467602214c20906c9aa0b2ab6c67812da793bfa39eae5b9ad91aa2c805d4",
+      "paid": "1000000",
+      "paidBeforeCommittedRuling": "0"
+    }
+  ],
+  "record": [
+    {
+      "status": "CONTESTED",
+      "lean": "NONE",
+      "clarity": 0
+    },
+    {
+      "status": "CONTESTED",
+      "lean": "NONE",
+      "clarity": 0
+    },
+    {
+      "status": "AGREED_TRUE",
+      "lean": "TRUE",
+      "clarity": 100
+    }
+  ],
+  "signalAfterRatify": {
+    "status": "RATIFIED",
+    "lean": "TRUE",
+    "clarity": 100,
+    "weight": 5,
+    "ruled": false,
+    "round": 1
+  },
+  "log": [
+    "inquiry rat-mvjogca9 | oracle 0x34A00eC1275dE6A4FCE9050f82c787B9fC90Fff4 | gate 0xBd223ab2018b71d85aD8299bF97192C9b5f930B6",
+    "convene -> ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1",
+    "leader record: 1:CONTESTED/NONE/0 2:CONTESTED/NONE/0 3:AGREED_TRUE/TRUE/100 ambiguity 67",
+    "open_policy (no committed text) -> ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1",
+    "claim BEFORE ratification (must be refused) -> ACCEPTED/MAJORITY_AGREE exec=ERROR rounds=1",
+    "ratify_payout prop 3 -> ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1",
+    "signal after ratify attempt: {\"status\":\"RATIFIED\",\"lean\":\"TRUE\",\"clarity\":100,\"weight\":5,\"ruled\":false,\"round\":1}",
+    "claim AFTER ratification -> ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1",
+    "open_policy (committed to the real clause) -> ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1",
+    "ruling on SUBSTITUTED text -> ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1",
+    "claim after substituted ruling (must be refused unless ratified separately) -> ACCEPTED/MAJORITY_AGREE exec=ERROR rounds=1",
+    "ruling on the COMMITTED text -> ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1",
+    "claim after the committed-text ruling -> ACCEPTED/MAJORITY_AGREE exec=SUCCESS rounds=1"
+  ]
+}

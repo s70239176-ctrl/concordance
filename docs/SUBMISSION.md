@@ -40,8 +40,8 @@ https://github.com/s70239176-ctrl/concordance/releases/tag/v4-film
 ## Contracts
 
 - Network: GenLayer Studio
-- Concordance (oracle): [`0x1e7d9A797860faCF5e993AFF715DD2C5d4B1f237`](https://explorer-studionet.genlayer.com/address/0x1e7d9A797860faCF5e993AFF715DD2C5d4B1f237)
-- ConcordanceGate (consumer): [`0x620ec49c91469A2fa7Fa0d08bD009d99CCBd6287`](https://explorer-studionet.genlayer.com/address/0x620ec49c91469A2fa7Fa0d08bD009d99CCBd6287)
+- Concordance (oracle): [`0x34A00eC1275dE6A4FCE9050f82c787B9fC90Fff4`](https://explorer-studionet.genlayer.com/address/0x34A00eC1275dE6A4FCE9050f82c787B9fC90Fff4)
+- ConcordanceGate (consumer): [`0xBd223ab2018b71d85aD8299bF97192C9b5f930B6`](https://explorer-studionet.genlayer.com/address/0xBd223ab2018b71d85aD8299bF97192C9b5f930B6)
 
 ## Real transactions
 

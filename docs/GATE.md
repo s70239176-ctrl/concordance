@@ -15,6 +15,8 @@ sentence.
 Cross-contract reads (`gl.get_contract_at(addr).view().method(...)`) are synchronous and deterministic, so they need
 no extra consensus. The docs did not say whether a view call is allowed inside a write method; it is (verified below).
 
+> **v5 note.** The gate now pays only on outcomes validators ratified (`ratify_payout`) or on a ruling made against the text the policy committed to at funding, and `open_policy` takes a `req_sources` argument. The measurements below were taken on v4 (before that change). The v5 run is in `docs/PAYOUT.md`.
+
 ## Measured on Studio
 Gate `0x620ec49c91469A2fa7Fa0d08bD009d99CCBd6287` reading Concordance v4 `0x1e7d9A797860faCF5e993AFF715DD2C5d4B1f237`
 (`scripts/gate-test.mjs`, results in `scripts/gate-result.json`):

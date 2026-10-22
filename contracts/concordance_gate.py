@@ -3,19 +3,29 @@
 from genlayer import *
 # NOTE: keep exactly two header lines above (version, then Depends) with nothing between
 # them and the imports; Studio (GenVM v0.2.16) rejects the file otherwise (invalid_contract).
+import hashlib
 import json
 from datetime import datetime, timezone
 
 MAX_REQS = 8
 MAX_ID = 64
+MAX_SOURCE = 1500
+
+
+def source_hash(text: str) -> str:
+    """Same hash the oracle uses: a ruling binds this policy only if it was made against exactly this committed text."""
+    return hashlib.sha256(text.strip().encode("utf-8")).hexdigest()
 
 
 def release_from_signals(signals: list, wants: list, min_clarity: int) -> int:
     """Share (0-100) of a policy that the Concordance signals justify releasing: each required proposition pays its
-    clarity (weighted) iff the record leans the wanted way and clears min_clarity. A ruled proposition has clarity 100."""
+    clarity (weighted) iff validators ratified a lean the wanted way that clears min_clarity. A proposition ruled on the
+    exact text the policy committed to has clarity 100. Anything unratified pays nothing."""
     total = sum(s["weight"] for s in signals) or 1
     got = 0
     for s, want in zip(signals, wants):
+        if s.get("status") not in ("RATIFIED", "RULED"):
+            continue  # defence in depth: only a ratified outcome or a ruling on the committed text can ever pay
         if s["lean"] == want and s["clarity"] >= min_clarity:
             got += s["weight"] * s["clarity"]
     return (got + total // 2) // total
@@ -35,7 +45,7 @@ class _Concordance:
     """The only things this contract needs from Concordance: two cheap views."""
 
     class View:
-        def get_signal(self, inquiry_id: str, prop_index: int): ...
+        def get_signal(self, inquiry_id: str, prop_index: int, source_hash: str): ...
         def get_status(self, inquiry_id: str): ...
 
     class Write:
@@ -66,7 +76,9 @@ class ConcordanceGate(gl.Contract):
 
     @gl.public.write.payable
     def open_policy(self, policy_id: str, inquiry_id: str, beneficiary: str,
-                    req_props: list[int], req_wants: list[str], min_clarity: int) -> None:
+                    req_props: list[int], req_wants: list[str], min_clarity: int, req_sources: list[str]) -> None:
+        """`req_sources`: per required proposition, the exact governing text a ruling may use ("" = rulings never count).
+        It is hashed and fixed at funding; a ruling on any other text cannot release this policy's money."""
         policy_id = policy_id.strip()
         if not policy_id or len(policy_id) > MAX_ID or policy_id in self.policies:
             raise gl.vm.UserError("policy_id missing or duplicate")
@@ -75,6 +87,9 @@ class ConcordanceGate(gl.Contract):
         wants = [w.strip().upper() for w in req_wants]
         if any(w not in ("TRUE", "FALSE") for w in wants) or any(i < 0 for i in req_props):
             raise gl.vm.UserError("bad requirement")
+        sources = [t.strip() for t in req_sources]
+        if len(sources) != len(req_props) or any(len(t) > MAX_SOURCE for t in sources):
+            raise gl.vm.UserError("one committed source (or \"\") per required proposition, <= %d chars" % MAX_SOURCE)
         if min_clarity < 0 or min_clarity > 100:
             raise gl.vm.UserError("min_clarity must be 0-100")
         if not (beneficiary.startswith("0x") and len(beneficiary) == 42):
@@ -90,6 +105,7 @@ class ConcordanceGate(gl.Contract):
         self.policies[policy_id] = json.dumps({
             "inquiry_id": inquiry_id, "funder": str(gl.message.sender_address), "beneficiary": beneficiary,
             "req_props": req_props, "req_wants": wants, "min_clarity": min_clarity,
+            "req_sources": sources, "req_hashes": [source_hash(t) if t else "" for t in sources],
             "escrow": value, "paid": 0, "status": "OPEN", "history": [],
         })
         self.policy_ids.append(policy_id)
@@ -102,8 +118,8 @@ class ConcordanceGate(gl.Contract):
             raise gl.vm.UserError("policy unknown or not open")
         oracle = self._oracle().view()
         signals = []
-        for i in pol["req_props"]:
-            raw = oracle.get_signal(pol["inquiry_id"], i)  # cross-contract read: deterministic, no consensus needed
+        for i, h in zip(pol["req_props"], pol["req_hashes"]):
+            raw = oracle.get_signal(pol["inquiry_id"], i, h)  # cross-contract read: deterministic, no consensus needed
             if not raw:
                 raise gl.vm.UserError("no signal yet: the inquiry has not been convened")
             signals.append(json.loads(raw))
@@ -111,9 +127,10 @@ class ConcordanceGate(gl.Contract):
         target = pol["escrow"] * pct // 100
         delta = max(0, target - pol["paid"])
         if delta <= 0:
-            raise gl.vm.UserError("nothing further to release at current clarity")
+            raise gl.vm.UserError("nothing further to release: no ratified outcome justifies it")
         pol["paid"] += delta  # effects before interactions
-        pol["history"].append({"release_pct": pct, "paid_now": delta, "ruled": [i for i, s in zip(pol["req_props"], signals) if s.get("ruled")], "at": self._now()})
+        pol["history"].append({"release_pct": pct, "paid_now": delta, "ruled": [i for i, s in zip(pol["req_props"], signals) if s.get("ruled")],
+                               "basis": [s.get("status") for s in signals], "at": self._now()})
         self.policies[policy_id] = json.dumps(pol)
         _Recipient(Address(pol["beneficiary"])).emit_transfer(value=u256(delta))
         return json.dumps({"release_pct": pct, "paid_now": delta, "paid_total": pol["paid"], "reserved": pol["escrow"] - pol["paid"]})

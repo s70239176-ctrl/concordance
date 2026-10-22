@@ -68,7 +68,8 @@ class GateTests(unittest.TestCase):
         self.oracle = self.cm.Concordance()
         self.oracle.inquiries, self.oracle.inquiry_ids = self.cm.TreeMap(), self.cm.DynArray()
         self.oracle.actions, self.oracle.action_ids = self.cm.TreeMap(), self.cm.DynArray()
-        self.oracle.rulings = self.cm.TreeMap()
+        self.oracle.rulings, self.oracle.ratified = self.cm.TreeMap(), self.cm.TreeMap()
+        tc.STATE.pop("validators", None)
         self.cgl.message.sender_address = "0xA"
         self.oracle.open_inquiry("i1", "What happened?", ["p one", "p two", "p three"], [5, 5, 5])
         self.oracle.submit_account("i1", "A", "yes", "", [])
@@ -84,54 +85,97 @@ class GateTests(unittest.TestCase):
     def sender(self, a, value=0):
         self.gl.message.sender_address, self.gl.message.value = a, value
 
-    def open(self, props=(0, 1), wants=("TRUE", "TRUE"), minc=0):
-        self.g.open_policy("p1", "i1", "0x" + "b" * 40, list(props), list(wants), minc)
+    def open(self, props=(0, 1), wants=("TRUE", "TRUE"), minc=0, sources=None):
+        self.g.open_policy("p1", "i1", "0x" + "b" * 40, list(props), list(wants), minc, list(sources if sources is not None else [""] * len(props)))
+
+    def ratify(self, *props):
+        for i in props:
+            self.oracle.ratify_payout("i1", i)
 
     def test_constructor_validates_address(self):
         with self.assertRaises(self.gl.vm.UserError):
             self.m.ConcordanceGate("nope")
 
     def test_release_from_signals_pure(self):
-        sig = [{"weight": 5, "lean": "TRUE", "clarity": 100}, {"weight": 5, "lean": "FALSE", "clarity": 60}]
+        sig = [{"status": "RATIFIED", "weight": 5, "lean": "TRUE", "clarity": 100},
+               {"status": "RATIFIED", "weight": 5, "lean": "FALSE", "clarity": 60}]
         self.assertEqual(self.m.release_from_signals(sig, ["TRUE", "TRUE"], 0), 50)
         self.assertEqual(self.m.release_from_signals(sig, ["TRUE", "FALSE"], 0), 80)
         self.assertEqual(self.m.release_from_signals(sig, ["TRUE", "FALSE"], 70), 50)
+        unratified = [dict(x, status="UNRATIFIED") for x in sig]  # defence in depth: an unratified signal never pays
+        self.assertEqual(self.m.release_from_signals(unratified, ["TRUE", "FALSE"], 0), 0)
 
     def test_open_policy_validation_and_cross_contract_check(self):
         with self.assertRaises(self.gl.vm.UserError):
-            self.g.open_policy("p", "does-not-exist", "0x" + "b" * 40, [0], ["TRUE"], 0)  # oracle says unknown
+            self.g.open_policy("p", "does-not-exist", "0x" + "b" * 40, [0], ["TRUE"], 0, [""])  # oracle says unknown
         self.sender("0xF", 0)
         with self.assertRaises(self.gl.vm.UserError):
             self.open()  # no value
         self.sender("0xF", 10)
         with self.assertRaises(self.gl.vm.UserError):
-            self.g.open_policy("p", "i1", "bad", [0], ["TRUE"], 0)
+            self.g.open_policy("p", "i1", "bad", [0], ["TRUE"], 0, [""])
         with self.assertRaises(self.gl.vm.UserError):
-            self.g.open_policy("p", "i1", "0x" + "b" * 40, [0, 0], ["TRUE", "TRUE"], 0)
+            self.g.open_policy("p", "i1", "0x" + "b" * 40, [0, 0], ["TRUE", "TRUE"], 0, ["", ""])
         with self.assertRaises(self.gl.vm.UserError):
-            self.g.open_policy("p", "i1", "0x" + "b" * 40, [0], ["MAYBE"], 0)
+            self.g.open_policy("p", "i1", "0x" + "b" * 40, [0], ["MAYBE"], 0, [""])
+        with self.assertRaises(self.gl.vm.UserError):
+            self.g.open_policy("p", "i1", "0x" + "b" * 40, [0], ["TRUE"], 0, [])  # a committed source (or "") per requirement
 
     def test_claim_pays_the_graded_share_and_never_twice(self):
         self.open()
+        with self.assertRaises(self.gl.vm.UserError):
+            self.g.claim("p1")  # nothing is ratified yet: the leader's annotated map pays nothing
+        self.ratify(0, 1)
         out = json.loads(self.g.claim("p1"))
-        self.assertEqual(out["release_pct"], 72)  # (5*100 + 5*43) / 10
-        self.assertEqual(SENT[-1], ("0x" + "b" * 40, 720))
+        self.assertEqual(out["release_pct"], 70)  # (5*100 + 5*40) / 10: the ratified clarity floor
+        self.assertEqual(SENT[-1], ("0x" + "b" * 40, 700))
         with self.assertRaises(self.gl.vm.UserError):
             self.g.claim("p1")
 
     def test_a_ruling_on_the_oracle_unlocks_the_gate(self):
-        self.open(props=(2,), wants=("TRUE",))
+        self.open(props=(2,), wants=("TRUE",), sources=["Clause: it applies."])
         with self.assertRaises(self.gl.vm.UserError):
             self.g.claim("p1")  # deadlocked -> nothing releasable
         tc.STATE["llm"] = {"verdict": "HOLDS", "reason": "the clause covers it"}
         self.cgl.message.sender_address = "0xC"
-        self.oracle.request_ruling("i1", 2, "Clause: it applies.", "")
+        self.oracle.request_ruling("i1", 2, "Clause: it applies.", "")  # exactly the text the policy committed to
         out = json.loads(self.g.claim("p1"))
         self.assertEqual((out["release_pct"], out["paid_now"]), (100, 1000))
-        self.assertEqual(json.loads(self.g.get_policy("p1"))["history"][0]["ruled"], [2])
+        h = json.loads(self.g.get_policy("p1"))["history"][0]
+        self.assertEqual((h["ruled"], h["basis"]), ([2], ["RULED"]))
+
+    def test_validators_that_disagree_with_the_leader_leave_the_gate_unpayable(self):
+        self.open(props=(1,), wants=("TRUE",))
+        opposite = tc.llm_json([["A75", "A75"], ["A25", "D100"], ["A75", "D75"]])
+        tc.STATE["validators"] = [opposite] * 5
+        with self.assertRaises(self.cgl.vm.UserError):
+            self.oracle.ratify_payout("i1", 1)
+        with self.assertRaises(self.gl.vm.UserError):
+            self.g.claim("p1")
+        self.assertEqual(SENT, [])
+        self.assertEqual(json.loads(self.g.get_policy("p1"))["paid"], 0)
+
+    def test_substituted_post_funding_text_cannot_release_the_gate(self):
+        self.open(props=(2,), wants=("TRUE",), sources=["Clause 14.2: a port closure is a formal order."])
+        tc.STATE["llm"] = {"verdict": "HOLDS", "reason": "substituted"}
+        self.cgl.message.sender_address = "0xATTACKER"
+        self.oracle.request_ruling("i1", 2, "Clause 14.2: an anchorage hold is a port closure.", "")
+        with self.assertRaises(self.gl.vm.UserError):
+            self.g.claim("p1")
+        self.assertEqual(SENT, [])
+        self.assertEqual(json.loads(self.g.get_policy("p1"))["paid"], 0)
+
+    def test_a_policy_funded_without_a_committed_text_ignores_rulings(self):
+        self.open(props=(2,), wants=("TRUE",), sources=[""])
+        tc.STATE["llm"] = {"verdict": "HOLDS", "reason": "x"}
+        self.oracle.request_ruling("i1", 2, "any text", "")
+        with self.assertRaises(self.gl.vm.UserError):
+            self.g.claim("p1")
+        self.assertEqual(SENT, [])
 
     def test_refund_only_funder_only_when_inquiry_cannot_improve_and_conserves_funds(self):
         self.open()
+        self.ratify(0, 1)
         self.g.claim("p1")
         with self.assertRaises(self.gl.vm.UserError):
             self.g.refund("p1")  # inquiry still open
@@ -141,7 +185,7 @@ class GateTests(unittest.TestCase):
         with self.assertRaises(self.gl.vm.UserError):
             self.g.refund("p1")
         self.sender("0xF")
-        self.assertEqual(json.loads(self.g.refund("p1"))["refunded"], 280)
+        self.assertEqual(json.loads(self.g.refund("p1"))["refunded"], 300)
         self.assertEqual(sum(v for _, v in SENT), 1000)
         with self.assertRaises(self.gl.vm.UserError):
             self.g.refund("p1")

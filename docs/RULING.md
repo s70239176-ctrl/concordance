@@ -24,6 +24,8 @@ should do something about each class.
   `execute_action` and the gate contract all read the *effective* record, so a ruling moves money.
 - The governing text is screened for instruction-like content (same greybox scan as evidence) and rejected up front.
 
+> **v5 note.** Rulings are stored per hash of the governing text, and only move money for an action or policy that committed to that same text at funding. See `docs/PAYOUT.md`. The measurements below are from v4.
+
 ### Measured on GenLayer Studio (v4 `0x1e7d9A797860faCF5e993AFF715DD2C5d4B1f237`)
 Two purpose-built inquiries whose propositions each turn on a clause. 10 rulings, all `ACCEPTED / MAJORITY_AGREE`,
 **every one in a single consensus round** (16-29 s). Raw data: `scripts/rulings-easy.json`, `scripts/rulings-hard.json`.

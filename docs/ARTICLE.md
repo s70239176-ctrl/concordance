@@ -87,6 +87,7 @@ On Studio, through the public interface: the gate paid **43%** while the dispute
 
 ## Known limits
 
+- **Payouts (v5):** funds move only on outcomes validators ratify one proposition at a time, and on rulings made against text committed at funding. On real Studio records, a single proposition's lean matched between two models only about 30% of the time, so ratification can fail and then nothing pays. That is the intended safe failure. See `docs/PAYOUT.md`.
 - **The requester supplies the governing text for a ruling, and a final ruling cannot be redone.** The text is stored next to the ruling, so the choice is auditable, but a bad-faith party could quote a clause selectively, and we found a concrete case while testing: facts typed into the text box are treated as part of the text. Binding the governing text when the inquiry opens is the obvious next step. Do not use rulings adversarially until then.
 - Everything was measured on Studio, not Bradbury, on essentially one scenario.
 - The wallet path was tested against a mock wallet, not real MetaMask.
@@ -104,6 +105,6 @@ Bind the governing text at inquiry creation. Run the same measurements on Bradbu
 - **Showcase and 75-second tour:** [concordance-web.vercel.app](https://concordance-web.vercel.app/)
 - **Public app, open your own inquiry:** [concordance-web.vercel.app/app.html](https://concordance-web.vercel.app/app.html)
 - **Source and docs (MIT):** [github.com/s70239176-ctrl/concordance](https://github.com/s70239176-ctrl/concordance)
-- **On GenLayer Studio:** Concordance `0x1e7d9A797860faCF5e993AFF715DD2C5d4B1f237`, ConcordanceGate `0x620ec49c91469A2fa7Fa0d08bD009d99CCBd6287`
+- **On GenLayer Studio:** Concordance `0x34A00eC1275dE6A4FCE9050f82c787B9fC90Fff4`, ConcordanceGate `0xBd223ab2018b71d85aD8299bF97192C9b5f930B6` (v5; the measurements above were taken on v4 `0x1e7d9A797860faCF5e993AFF715DD2C5d4B1f237` and gate `0x620ec49c91469A2fa7Fa0d08bD009d99CCBd6287`, see `docs/PAYOUT.md` for what v5 changed)
 
 *Concordance is an experiment, not an audited protocol. Everything submitted through the public app is public and permanent.*
