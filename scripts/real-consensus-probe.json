@@ -1,0 +1,285 @@
+{
+  "oracle": "0x22F0DFB2e1e76F39e6FB06f8F86BD46dc11fa3e1",
+  "inquiry": "probe-mvjwcpi7",
+  "steps": [
+    {
+      "name": "opposite lean",
+      "status": "UNDETERMINED",
+      "result": "MAJORITY_DISAGREE",
+      "num_rounds": 4,
+      "rounds": [
+        {
+          "round": 1,
+          "leader": "google/gemini-3-flash-preview",
+          "votes": [
+            {
+              "model": "gemini",
+              "vote": "disagree"
+            },
+            {
+              "model": "qwen",
+              "vote": "idle"
+            },
+            {
+              "model": "sonnet",
+              "vote": "idle"
+            },
+            {
+              "model": "gpt-5-4",
+              "vote": "disagree"
+            }
+          ]
+        },
+        {
+          "round": 2,
+          "leader": "qwen",
+          "votes": [
+            {
+              "model": "minimax",
+              "vote": "disagree"
+            },
+            {
+              "model": "gemini",
+              "vote": "disagree"
+            },
+            {
+              "model": "sonnet",
+              "vote": "disagree"
+            },
+            {
+              "model": "gpt-5-4",
+              "vote": "idle"
+            }
+          ]
+        },
+        {
+          "round": 3,
+          "leader": "sonnet",
+          "votes": [
+            {
+              "model": "minimax",
+              "vote": "disagree"
+            },
+            {
+              "model": "gpt-5-4",
+              "vote": "idle"
+            },
+            {
+              "model": "gemini",
+              "vote": "disagree"
+            },
+            {
+              "model": "openai/gpt-5.4",
+              "vote": "idle"
+            }
+          ]
+        },
+        {
+          "round": 4,
+          "leader": "kimi",
+          "votes": [
+            {
+              "model": "minimax",
+              "vote": "disagree"
+            },
+            {
+              "model": "openai/gpt-5.4",
+              "vote": "idle"
+            },
+            {
+              "model": "gemini",
+              "vote": "disagree"
+            },
+            {
+              "model": "gpt-5-4",
+              "vote": "disagree"
+            }
+          ]
+        }
+      ],
+      "signal": "UNRATIFIED"
+    },
+    {
+      "name": "invented support",
+      "status": "UNDETERMINED",
+      "result": "MAJORITY_DISAGREE",
+      "num_rounds": 4,
+      "rounds": [
+        {
+          "round": 1,
+          "leader": "gpt-5-4",
+          "votes": [
+            {
+              "model": "deepseek",
+              "vote": "idle"
+            },
+            {
+              "model": "openai/gpt-5.4",
+              "vote": "disagree"
+            },
+            {
+              "model": "anthropic/claude-sonnet-4.6",
+              "vote": "disagree"
+            },
+            {
+              "model": "google/gemini-3-flash-preview",
+              "vote": "disagree"
+            }
+          ]
+        },
+        {
+          "round": 2,
+          "leader": "openai/gpt-5.4",
+          "votes": [
+            {
+              "model": "deepseek",
+              "vote": "disagree"
+            },
+            {
+              "model": "anthropic/claude-sonnet-4.6",
+              "vote": "disagree"
+            },
+            {
+              "model": "gemma",
+              "vote": "idle"
+            },
+            {
+              "model": "google/gemini-3-flash-preview",
+              "vote": "disagree"
+            }
+          ]
+        },
+        {
+          "round": 3,
+          "leader": "google/gemini-3-flash-preview",
+          "votes": [
+            {
+              "model": "anthropic/claude-sonnet-4.6",
+              "vote": "idle"
+            },
+            {
+              "model": "gemma",
+              "vote": "idle"
+            },
+            {
+              "model": "minimax",
+              "vote": "disagree"
+            },
+            {
+              "model": "deepseek",
+              "vote": "disagree"
+            }
+          ]
+        },
+        {
+          "round": 4,
+          "leader": "minimax",
+          "votes": [
+            {
+              "model": "gemma",
+              "vote": "idle"
+            },
+            {
+              "model": "gpt-5-4",
+              "vote": "disagree"
+            },
+            {
+              "model": "deepseek",
+              "vote": "disagree"
+            },
+            {
+              "model": "anthropic/claude-sonnet-4.6",
+              "vote": "disagree"
+            }
+          ]
+        }
+      ],
+      "signal": "UNRATIFIED"
+    },
+    {
+      "name": "honest control",
+      "status": "ACCEPTED",
+      "result": "MAJORITY_AGREE",
+      "num_rounds": 1,
+      "rounds": [
+        {
+          "round": 1,
+          "leader": "gpt-5-4",
+          "votes": [
+            {
+              "model": "glm",
+              "vote": "agree"
+            },
+            {
+              "model": "gpt-5-4",
+              "vote": "agree"
+            },
+            {
+              "model": "anthropic/claude-sonnet-4.6",
+              "vote": "idle"
+            },
+            {
+              "model": "mistral",
+              "vote": "idle"
+            }
+          ]
+        }
+      ],
+      "signal": "RATIFIED"
+    }
+  ],
+  "record": [
+    {
+      "status": "AGREED_TRUE",
+      "lean": "TRUE",
+      "clarity": 100
+    },
+    {
+      "status": "AGREED_TRUE",
+      "lean": "TRUE",
+      "clarity": 100
+    },
+    {
+      "status": "UNSUPPORTED",
+      "lean": "NONE",
+      "clarity": 0
+    },
+    {
+      "status": "AGREED_TRUE",
+      "lean": "TRUE",
+      "clarity": 100
+    }
+  ],
+  "executeAfterLies": {
+    "exec": "ERROR",
+    "paid": "0"
+  },
+  "executeAfterHonest": {
+    "exec": "SUCCESS",
+    "paid": "500000"
+  },
+  "log": [
+    "probe contract 0x22F0DFB2e1e76F39e6FB06f8F86BD46dc11fa3e1 inquiry probe-mvjwcpi7",
+    "convene (real consensus) -> ACCEPTED MAJORITY_AGREE rounds=1",
+    "   round 1 leader sonnet | votes: agree idle idle agree",
+    "leader record: 1:AGREED_TRUE/TRUE/100 2:AGREED_TRUE/TRUE/100 3:UNSUPPORTED/NONE/0 4:AGREED_TRUE/TRUE/100 ambiguity 25",
+    "agreed TRUE proposition: 1; unsupported/no-lean proposition: 3",
+    "1. lying leader: proposition 1 is FALSE at clarity 100 (validators read TRUE) -> UNDETERMINED MAJORITY_DISAGREE rounds=4",
+    "   round 1 leader google/gemini-3-flash-preview | votes: disagree idle idle disagree",
+    "   round 2 leader qwen | votes: disagree disagree disagree idle",
+    "   round 3 leader sonnet | votes: disagree idle disagree idle",
+    "   round 4 leader kimi | votes: disagree idle disagree disagree",
+    "   signal: {\"status\":\"UNRATIFIED\",\"lean\":\"NONE\",\"clarity\":0,\"weight\":5,\"ruled\":false,\"round\":1}",
+    "2. lying leader: proposition 3 is TRUE at clarity 100 (validators see no support) -> UNDETERMINED MAJORITY_DISAGREE rounds=4",
+    "   round 1 leader gpt-5-4 | votes: idle disagree disagree disagree",
+    "   round 2 leader openai/gpt-5.4 | votes: disagree disagree idle disagree",
+    "   round 3 leader google/gemini-3-flash-preview | votes: idle idle disagree disagree",
+    "   round 4 leader minimax | votes: idle disagree disagree disagree",
+    "   signal: {\"status\":\"UNRATIFIED\",\"lean\":\"NONE\",\"clarity\":0,\"weight\":5,\"ruled\":false,\"round\":1}",
+    "   execute_action after the two lies: exec=ERROR paid=0",
+    "3. control, honest leader: proposition 1 is TRUE at clarity 100 -> ACCEPTED MAJORITY_AGREE rounds=1",
+    "   round 1 leader gpt-5-4 | votes: agree agree idle idle",
+    "   signal: {\"status\":\"RATIFIED\",\"lean\":\"TRUE\",\"clarity\":100,\"weight\":5,\"ruled\":false,\"round\":1}",
+    "   execute_action after the honest ratification: exec=SUCCESS paid=500000"
+  ]
+}

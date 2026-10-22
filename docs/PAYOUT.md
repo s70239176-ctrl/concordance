@@ -85,13 +85,39 @@ asymmetric accounts, `convene`, then `ratify_payout` on every proposition whose 
 - Small sample (one scenario family, 9 propositions). The earlier 32% figure came from comparing recorded model pairs; this
   is the real transaction path and looks better for agreed propositions, but it is not a precise rate.
 
+## Real consensus, not simulated: validators refusing a leader that differs from their own reading
+
+The unit tests simulate validators with a stub. This section is the same property on **real GenLayer Studio consensus**, with
+real validators running different models.
+
+**Probe contract** `0x22F0DFB2e1e76F39e6FB06f8F86BD46dc11fa3e1` ([explorer](https://explorer-studionet.genlayer.com/address/0x22F0DFB2e1e76F39e6FB06f8F86BD46dc11fa3e1)):
+`contracts/test_only/concordance_probe.py` is the v5 contract plus one test-only method, `ratify_forced`, whose **leader is
+malicious**: it proposes a lean and clarity we dictate instead of its own reading. The validator logic is the real, unchanged
+`ratify_payout` validator. It is not used by the app and is not part of the shipped contract. Script: `scripts/real-consensus-probe.mjs`,
+log `scripts/real-consensus-probe.log`, data `scripts/real-consensus-probe.json`. The inquiry was convened by real validators
+(`ACCEPTED / MAJORITY_AGREE`) and an escrow was funded that requires proposition 1 and proposition 3 to be TRUE.
+
+| # | Leader proposes | Validators' own reading | Real consensus result | Stored signal | Escrow |
+|---|---|---|---|---|---|
+| 1 | prop 1 **FALSE**, clarity 100 | AGREED TRUE | `UNDETERMINED / MAJORITY_DISAGREE`, **all 4 leader rotations** (gemini, qwen, sonnet, kimi) refused | `UNRATIFIED`, lean NONE | |
+| 2 | prop 3 **TRUE**, clarity 100 | UNSUPPORTED, no lean | `UNDETERMINED / MAJORITY_DISAGREE`, **all 4 leader rotations** (gpt-5.4, gpt-5.4, gemini, minimax) refused | `UNRATIFIED`, lean NONE | `execute_action` rejected, **paid 0** |
+| 3 (control) | prop 1 **TRUE**, clarity 100 | AGREED TRUE | `ACCEPTED / MAJORITY_AGREE`, round 1 | `RATIFIED / TRUE / 100` | `execute_action` paid **500,000 of 1,000,000 wei** (proposition 1 only; proposition 3 still unratified) |
+
+Observations, stated plainly:
+- In every rejected round a majority of the validators that voted voted `disagree`, and **none voted agree**. Several validators
+  recorded `idle` (they did not vote that round); those are visible in the log and I have not tried to explain them.
+- So a leader whose proposal differs from what validators independently derive cannot get a lean or clarity stored, and a
+  funded escrow that depends on it releases nothing. When the leader is honest, the same code path pays.
+- Limits: one scenario, one run, and the probe forces a *blatant* lie (opposite lean, invented support). It shows validators
+  enforce the check; it does not measure how subtle leader disagreements, such as a one-step clarity difference, are handled.
+
 ### Trying to provoke a failed ratification on Studio
 `scripts/ratify-stress.mjs` (log `scripts/ratify-stress.log`, data `scripts/ratify-stress.json`): three deliberately subjective
 inquiries (contractor quality, a used car, a tenancy), then `ratify_payout` on every proposition with a lean, retrying up to twice.
 Two of the three inquiries had no leaning proposition at all (all deadlocked, ambiguity 100); the third had three contested leans.
 
 - 4 `ratify_payout` transactions, **all `ACCEPTED / MAJORITY_AGREE` in one round. I did not observe a transaction fail to reach
-  consensus.** The failed-consensus path is therefore verified only by the local stub, not on Studio.
+  consensus.** The failed-consensus path was then verified on real consensus with the malicious-leader probe in the section above.
 - Of the 3 contested leans, 3 were eventually ratified with a lean at clarity floor 20 (two on the first try, one after a
   retry whose first attempt stored "NONE, 0"). Contested leans can become payable, but only at a low clarity floor here, so
   they pay a small share (20%). This corrects the "0 of 2 contested" reading above: with more samples the contested count is
